@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Homework</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one task card per screen on a burgundy gradient, progress dots on top, score at the end */
+:root{
+  --bg:#eef6f5; --card:#ffffff; --fg:#10292a; --muted:#557172;
+  --accent:#0d7d74; --accent-2:#2bb3a3; --soft:#e2f2f0; --line:#cfe4e1; --on:#ffffff;
+  --ok:#3d7a2a; --okbg:#e9f4e1; --bad:#c2410c; --badbg:#fdeee5; --shadow:rgba(8,60,56,.12);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1a1b; --card:#122627; --fg:#e6f4f2; --muted:#94b5b2;
+  --accent:#5fd6c5; --accent-2:#8ee6d8; --soft:#183536; --line:#244445; --on:#06201e;
+  --ok:#a6dc86; --okbg:#1c2f17; --bad:#ffa37a; --badbg:#3a2015; --shadow:rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1a1b; --card:#122627; --fg:#e6f4f2; --muted:#94b5b2;
+  --accent:#5fd6c5; --accent-2:#8ee6d8; --soft:#183536; --line:#244445; --on:#06201e;
+  --ok:#a6dc86; --okbg:#1c2f17; --bad:#ffa37a; --badbg:#3a2015; --shadow:rgba(0,0,0,.35); color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.5}
+.hero{background:linear-gradient(135deg,#073b3a,#0d7d74 55%,#3cc4b0);color:#fff;
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero .in,.wrap{max-width:680px;margin:0 auto}
+.hero h1{margin:0;font-size:1.9rem;font-weight:700;text-wrap:balance}
+.hero p{margin:6px 0 0;opacity:.85}
+.dots{display:flex;gap:6px;margin-top:18px}
+.dots button{flex:1;height:18px;border:0;padding:7px 0;background:none;cursor:pointer}
+.dots button::after{content:"";display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.25);transition:background .2s}
+.dots button.on::after{background:rgba(255,255,255,.6)}
+.dots button.now::after{background:#fff}
+.dots button:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:4px}
+.wrap{padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));margin-top:-32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:0 10px 30px var(--shadow);display:grid;gap:18px}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h2{margin:2px 0 0;font-size:1.4rem;text-wrap:balance}
+.instr{margin:0;color:var(--muted)}
+.text{background:var(--soft);border-radius:10px;padding:16px 18px;line-height:1.7}
+.text b{color:var(--accent)}
+.fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.fam div{background:var(--soft);border-radius:10px;padding:12px;text-align:center}
+.fam strong{display:block;font-size:1.05rem}
+.fam small{color:var(--muted)}
+.order{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:.95rem}
+.order .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.order .lbl{color:var(--muted)}
+.q{display:grid;gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:0}
+.qt{font-weight:600}
+.qt .n{color:var(--accent);margin-right:6px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;cursor:pointer}
+.opt{border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:8px 16px;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible,.tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.opt:disabled{cursor:default}
+.fb{font-size:.9rem;font-weight:600}
+.q .fb:empty{display:none}
+.fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+.chat:empty::before{content:"Tap the lines below.";color:var(--muted);font-size:.9rem;align-self:center;justify-self:center}
+.actions.tools{justify-content:flex-start;margin-top:-6px}
+.chat{display:grid;gap:8px;min-height:72px;padding:12px;border:1.5px dashed var(--line);border-radius:10px}
+.chat .line{padding:8px 12px;border-radius:10px;background:var(--soft);max-width:85%}
+.chat .line.r{justify-self:end;background:var(--accent);color:var(--on)}
+.gap{display:inline-block;min-width:4.5em;height:1.5em;vertical-align:-.3em;margin:0 4px;border-radius:6px;background:var(--soft);border:1.5px dashed var(--accent-2);padding:0 8px;line-height:1.4em;text-align:center}
+.gap.filled{border-style:solid;border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.chat .line.ok{outline:2px solid var(--ok)} .chat .line.bad{outline:2px solid var(--bad)}
+.chat .who{font-size:.7rem;opacity:.7;display:block;letter-spacing:.06em;text-transform:uppercase}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{border:1.5px solid var(--accent);background:var(--card);color:var(--fg);border-radius:10px;padding:8px 12px;text-align:left}
+.tile:hover{background:var(--soft)}
+.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:12px 22px;background:var(--accent);color:var(--on);font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.done{color:var(--ok);font-weight:700}
+.score{font-size:3.4rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.brk{display:grid;gap:6px;font-variant-numeric:tabular-nums}
+.brk .row{display:flex;justify-content:space-between;gap:12px;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--fg);padding:8px 4px;text-align:left;border-radius:6px}
+.brk .row:hover{background:var(--soft)}
+.brk .row.fix span:last-child{color:var(--bad);font-weight:600}
+.brk .row.full span:last-child{color:var(--ok);font-weight:600}
+.bar{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="hero"><div class="in">
+  <h1>Homework</h1>
+  <p>Nine tasks. Good luck!</p>
+  <div class="dots" id="dots"></div>
+</div></header>
+<main class="wrap"><section class="card" id="card"></section></main>
+
+<script>
+const T=[
+{title:"Meet Anna",instr:"Read the text. Choose the right answer.",
+ html:`<div class="text">This is Anna. She's about 30. Anna and her husband Tom are from a small village in the north. Now their flat is in a big city, in the centre. It's a small flat. Anna is a nurse. Tom is a taxi driver. Anna's favourite drink is tea with lemon. Tom's favourite drink is americano.</div>`,
+ qs:[["How old is Anna?",["She's about 30.","She's about 13.","She's about 40."]],
+     ["Where is their flat?",["In a big city.","In a small village.","In the north."]],
+     ["Who is Tom?",["Anna's husband.","Anna's son.","Anna's father."]],
+     ["Is their flat big?",["No, it's small.","Yes, it's big.","Yes, it's a house."]],
+     ["What's Anna's favourite drink?",["Tea with lemon.","Tea with milk.","Americano."]],
+     ["Tom is a ___ .",["taxi driver","nurse","baby boy"]]]},
+{title:"Who is it?",instr:"Look at Anna's family. Choose the right word.",
+ html:`<div class="fam"><div><strong>Anna</strong><small>wife</small></div><div><strong>Tom</strong><small>husband</small></div><div><strong>Lily</strong><small>baby girl</small></div><div><strong>Max</strong><small>baby boy</small></div><div><strong>Rose &amp; Bill</strong><small>Anna's parents</small></div></div>`,
+ qs:[["Tom is ___ husband.",["Anna's","Tom's","Lily's"]],
+     ["Lily is Anna's baby girl. Anna is ___ mother.",["her","his","their"]],
+     ["Max is Tom's baby boy. Tom is ___ father.",["his","her","our"]],
+     ["Rose and Bill: \"Anna is ___ daughter.\"",["our","their","his"]],
+     ["Lily and Max are Anna and Tom's children. Anna and Tom are ___ parents.",["their","our","her"]],
+     ["Anna and Tom: \"Lily is ___ baby girl.\"",["our","their","his"]]]},
+{title:"Café order",instr:"Put the dialogue in the right order. Tap the lines.",type:"order",
+ lines:[["Waiter","What would you like?"],["Anna","A large cappuccino and a sandwich, please."],["Waiter","Anything else?"],["Anna","No, thanks."],["Waiter","That's seven oh five."],["Anna","Here you are."],["Waiter","Your change."],["Anna","Thank you."],["Waiter","You're welcome."]]},
+{title:"It's not right!",instr:"Look at the order. Choose the right sentence.",
+ qs:[["You order: <b>a large cappuccino</b>. You get: a medium cappuccino.",["It's medium — not large.","It's not hot.","It's not the right money."]],
+     ["You order: <b>a latte</b>. You get: an espresso.",["It's not the right coffee.","It's not a large latte.","It's not the right money."]],
+     ["You order: <b>a hot tea</b>. You get: a cold tea.",["My tea — it's not hot!","My tea — it's not cold!","It's not medium."]],
+     ["You give: <b>ten pounds</b>. Your change: one pound. It's wrong!",["It's not the right money.","It's not the right coffee.","It's not hot."]],
+     ["You order: <b>tea with mint</b>. You get: tea with milk.",["It's not the right tea.","It's not the right money.","It's not large."]]]},
+{title:"Numbers everywhere",instr:"Read the sign. Choose the right answer.",
+ html:`<div class="order"><div class="row"><span class="lbl">Café Coffee Time</span><span>Monday – Friday</span></div><div class="row"><span class="lbl">Open</span><span>from 8.30 to 6.15</span></div><div class="row"><span class="lbl">Americano</span><span>3.50</span></div><div class="row"><span class="lbl">Cake</span><span>4.05</span></div></div>`,
+ qs:[["8.30 is…",["eight thirty","eight thirteen","three eight"]],
+     ["How much is the cake?",["four oh five","four five","forty five"]],
+     ["How much is the americano?",["three fifty","three fifteen","thirty five"]],
+     ["Is the café open on Sunday?",["No, it's open from Monday to Friday.","Yes, it is.","Yes, from Sunday to Friday."]],
+     ["What time is the café open?",["From eight thirty to six fifteen.","From six fifteen to eight thirty.","From eight to six."]],
+     ["Home → café: 15 minutes. How long is it?",["It takes fifteen minutes.","It takes fifty minutes.","It's fifteen hours."]],
+     ["What day is after Wednesday?",["Thursday","Tuesday","Friday"]]]},
+{title:"At the restaurant",instr:"Choose the right sentence for the situation.",
+ qs:[["You have the menu. You don't know what you want.",["Can I have a minute, please?","Can I have my money back?","Your change."]],
+     ["You want your drinks before the food.",["Can we have our drinks first, please?","Can I have a minute, please?","Anything else?"]],
+     ["The dessert is here. You don't like it.",["Sorry, I don't like this dessert. Can I change it?","Can we have our drinks first, please?","It's not the right money."]],
+     ["You don't want the dessert. You want your money.",["Can I have my money back for the dessert?","Can I change it?","What would you like?"]]]},
+{title:"Quick replies",instr:"Choose the best reply.",
+ qs:[["Thank you!",["You're welcome.","Thanks.","Really?"]],
+     ["I'm at work. And you?",["I'm at home.","I'm about 30.","I know!"]],
+     ["Excuse me! Where's a bus stop?",["Over there.","It's cheap.","I'm at university."]],
+     ["The number 19 bus is here!",["Really?","You're welcome.","It's expensive."]],
+     ["Is it your ticket?",["I don't know!","It takes 10 minutes.","Over there."]],
+     ["It's 4 pounds. — That's right!",["Nice.","Sorry!","It's wrong."]],
+     ["What time is it? — It's two fifteen.",["Thanks.","Really? It's cheap!","I'm at home."]]]},
+{title:"Tom's city",instr:"Read Tom's text. Choose the right answer.",
+ html:`<div class="text">Hi, I'm Tom. My village is in the north. It's a small village near a road. A house there is cheap. Now our flat is in a big city, in the centre. Flats here are expensive! I'm a taxi driver. My friends work in an office. The park is near — it takes 10 minutes. I walk in the park with Lily and Max. There are a lot of children there. I like fresh fruit. Meat? I don't like it.</div>`,
+ qs:[["Tom's village is in the ___ .",["north","south","centre"]],
+     ["Is Tom's village big?",["No, it's a small village.","Yes, it's a big city.","Yes, it's a big area."]],
+     ["A house in the village is ___ .",["cheap","expensive","far"]],
+     ["Where is the flat now?",["In the centre of a big city.","In a small village.","Near a road in the north."]],
+     ["Flats in the city are ___ .",["expensive","cheap","near"]],
+     ["Tom's friends work in ___ .",["an office","a taxi","the park"]],
+     ["How long is it to the park?",["It takes 10 minutes.","It's 10 pounds.","It takes 10 hours."]],
+     ["Some meat, Tom?",["No, thanks. I don't like it.","Yes, it's far.","Over there."]]]},
+{title:"Near and far",instr:"Choose the right word.",
+ qs:[["near ↔ ___",["far","here","cheap"]],
+     ["expensive ↔ ___",["cheap","big","near"]],
+     ["the north ↔ ___",["the south","the centre","an area"]],
+     ["a big city ↔ ___",["a small village","a big house","a road"]],
+     ["here ↔ ___",["there","near","the centre"]],
+     ["Excuse me! Where's Lily? — She's ___ , in the park.",["over there","expensive","a road"]],
+     ["The city is far. Take a ___ !",["taxi","road","flat"]],
+     ["Anna and ___ are at work.",["some nurses","a taxi","a road"]],
+     ["The park: a lot of ___ .",["children","meat","offices"]],
+     ["Lily's ___ fruit is watermelon.",["favourite","expensive","near"]],
+     ["The centre is a nice ___ .",["area","taxi","fruit"]],
+     ["Apples and watermelon are ___ .",["fresh fruit","some meat","flats"]]]}
+];
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const KEY='hw-a0-homework-v1';
+let S={cur:0,a:{},o:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.a)S=s}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const card=document.getElementById('card'),dots=document.getElementById('dots');
+const maxOf=t=>t.type==="order"?t.lines.length:t.qs.length;
+function gotOf(i){const t=T[i];
+  if(t.type==="order"){const o=S.o[i];return o&&o.checked?o.p.filter((v,k)=>v===k).length:0}
+  const a=S.a[i]||{};return t.qs.filter((q,qi)=>a[qi]===q[1][0]).length}
+function drawDots(){dots.innerHTML=T.map((t,i)=>`<button class="${i<S.cur?'on':''}${i===S.cur?' now':''}" aria-label="Task ${i+1}: ${t.title}" title="${i+1}. ${t.title}"></button>`).join('');dots.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>go(i))}
+function head(t,i){return `<div><div class="eyebrow">Task ${i+1} of ${T.length}</div><h2>${t.title}</h2></div><p class="instr">${t.instr}</p>${t.html||''}`}
+function nav(){return `<div class="actions"><span class="fb" id="done"></span>${S.cur>0?'<button class="btn ghost" id="back">Back</button>':''}<button class="btn" id="next">${S.cur===T.length-1?'See my score':'Next'}</button></div>`}
+function go(i){S.cur=i;save();render()}
+function bindNav(){card.querySelector('#next').onclick=()=>go(S.cur+1);const b=card.querySelector('#back');if(b)b.onclick=()=>go(S.cur-1)}
+function done(){const d=card.querySelector('#done');d.textContent='Great job!';d.className='fb done'}
+function render(){
+  drawDots();window.scrollTo(0,0);
+  if(S.cur>=T.length)return final();
+  const ti=S.cur,t=T[ti];
+  if(t.type==="order")return renderOrder(t,ti);
+  const a=S.a[ti]=S.a[ti]||{};
+  // wrong answers are cleared on each visit so they can be fixed
+  t.qs.forEach((q,qi)=>{if(a[qi]!==undefined&&a[qi]!==q[1][0])delete a[qi]});save();
+  card.innerHTML=head(t,ti)+t.qs.map((q,qi)=>`<div class="q" data-q="${qi}"><div class="qt"><span class="n">${qi+1}</span>${q[0].replace('___','<span class="gap"></span>')}</div><div class="opts">${shuf(q[1]).map(o=>`<button class="opt">${o}</button>`).join('')}</div><div class="fb"></div></div>`).join('')+nav();
+  const check=()=>{if(t.qs.every((q,qi)=>a[qi]!==undefined))done()};
+  card.querySelectorAll('.q').forEach(qe=>{
+    const qi=+qe.dataset.q,q=t.qs[qi],fb=qe.querySelector('.fb'),opts=[...qe.querySelectorAll('.opt')];
+    const show=(txt)=>{
+      const right=txt===q[1][0];
+      opts.forEach(x=>{if(right)x.disabled=true;if(x.textContent===txt){x.classList.add(right?'ok':'bad');x.disabled=true}});
+      if(right){const gp=qe.querySelector('.gap');if(gp){gp.textContent=q[1][0];gp.classList.add('filled')}}
+      fb.textContent=right?"That's right!":"That's wrong!";fb.className='fb '+(right?'ok':'bad');
+    };
+    if(a[qi]!==undefined)show(a[qi]);
+    opts.forEach(b=>b.onclick=()=>{a[qi]=b.textContent;save();show(b.textContent);check()});
+  });
+  check();bindNav();
+}
+function renderOrder(t,ti){
+  let o=S.o[ti];
+  if(o&&o.checked&&o.p.some((v,k)=>v!==k))o=S.o[ti]=null;
+  if(!o)o=S.o[ti]={p:[],checked:false};save();
+  const pool=shuf(t.lines.map((l,i)=>i));
+  card.innerHTML=head(t,ti)+`<div class="chat" id="chat"></div><div class="tiles" id="tiles"></div><div class="actions tools"><button class="btn ghost" id="undo">Undo</button><button class="btn" id="chk" disabled>Check</button></div>`+nav();
+  const chat=card.querySelector('#chat'),tiles=card.querySelector('#tiles'),chk=card.querySelector('#chk'),undo=card.querySelector('#undo');
+  const draw=()=>{
+    chat.innerHTML=o.p.map((i,k)=>{const l=t.lines[i];return `<div class="line ${l[0]==='Anna'?'r':''} ${o.checked?(i===k?'ok':'bad'):''}"><span class="who">${l[0]}</span>${l[1]}</div>`}).join('');
+    tiles.innerHTML='';
+    if(!o.checked)pool.filter(i=>!o.p.includes(i)).forEach(i=>{const b=document.createElement('button');b.className='tile';b.textContent=t.lines[i][1];b.onclick=()=>{o.p.push(i);save();draw()};tiles.appendChild(b)});
+    const wrong=o.checked&&o.p.some((v,k)=>v!==k);chk.disabled=o.checked||o.p.length!==t.lines.length;undo.textContent=wrong?'Start again':'Undo';undo.disabled=(o.checked&&!wrong)||!o.p.length;
+    if(o.checked)done();
+  };
+  undo.onclick=()=>{if(o.checked){o.p=[];o.checked=false}else o.p.pop();save();draw()};
+  chk.onclick=()=>{o.checked=true;save();draw()};
+  draw();bindNav();
+}
+function final(){
+  const g=T.reduce((s,_,i)=>s+gotOf(i),0),m=T.reduce((s,t)=>s+maxOf(t),0);
+  card.innerHTML=`<div><div class="eyebrow">Your score</div><h2>${g===m?'Excellent!':g/m>=.7?'Great job!':'Keep going!'}</h2></div><div class="score">${g} / ${m}</div><div class="bar"><i style="width:${Math.round(g/m*100)}%"></i></div><p class="instr">${g===m?'All answers are right!':'Tap a task to fix your mistakes.'}</p><div class="brk">${T.map((t,i)=>{const gi=gotOf(i),mi=maxOf(t);return `<button class="row${gi<mi?' fix':' full'}" data-i="${i}"><span>${i+1}. ${t.title}</span><span>${gi} / ${mi}</span></button>`}).join('')}</div><div class="actions"><button class="btn ghost" id="back">Back</button><button class="btn" id="again">Try again</button></div>`;
+  card.querySelectorAll('.brk .row').forEach(r=>r.onclick=()=>go(+r.dataset.i));
+  card.querySelector('#back').onclick=()=>go(T.length-1);
+  card.querySelector('#again').onclick=()=>{S={cur:0,a:{},o:{}};save();render()};
+}
+render();
+</script>
+
+</body>
+</html>
