@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}</style>
+<title>Price Listening Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a shop receipt on a counter; the answer field is a price tag */
+:root{--bg:#e9eee8;--paper:#fffdf8;--fg:#1f2a24;--muted:#6b776f;--accent:#2f6b4f;--tag:#f6d77a;--line:#d9ddd2;--good:#2f7a3f;--bad:#b3412e;
+--body:"IBM Plex Sans",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141916;--paper:#1f2621;--fg:#e6ece7;--muted:#9aa89f;--accent:#7cc39c;--tag:#c9a64a;--line:#344039;--good:#7bd18b;--bad:#f08a76;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141916;--paper:#1f2621;--fg:#e6ece7;--muted:#9aa89f;--accent:#7cc39c;--tag:#c9a64a;--line:#344039;--good:#7bd18b;--bad:#f08a76;color-scheme:dark}
+body{background:var(--bg);background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:18px 18px;color:var(--fg);font-family:var(--body);font-size:16px;padding-block:40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:420px;margin:0 auto}
+.card{background:var(--paper);padding:28px 24px 36px;display:flex;flex-direction:column;gap:18px;box-shadow:0 10px 30px rgb(0 0 0/.08);
+ -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/16px 100%}
+header{text-align:center;padding-bottom:16px;border-bottom:2px dashed var(--line)}
+h1{font-size:1.5rem;font-weight:600;margin:0;letter-spacing:.06em;text-transform:uppercase}
+p.sub{margin:6px 0 0;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:500 1rem var(--body);border-radius:10px;padding:13px 16px;cursor:pointer;border:1.5px solid var(--line);background:transparent;color:var(--fg)}
+button:hover{border-color:var(--accent)}
+.row.one{grid-template-columns:1fr}
+#next{background:color-mix(in srgb,var(--accent) 16%,var(--paper));border-color:color-mix(in srgb,var(--accent) 45%,var(--paper));color:var(--accent);font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper);grid-column:1/-1;font-size:1.1rem;padding:16px}
+button:focus-visible,#ans:focus-visible,#slow:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+label.slow{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:.95rem}
+#slow{accent-color:var(--accent);width:18px;height:18px}
+.tag{position:relative;margin:6px 8px 0}
+.tag::before{content:"";position:absolute;left:16px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--paper);box-shadow:inset 0 1px 2px rgb(0 0 0/.25)}
+#ans{display:block;font:600 2.2rem var(--body);font-variant-numeric:tabular-nums;width:100%;box-sizing:border-box;padding:14px 14px 14px 44px;border:0;background:var(--tag);color:#2a2410;text-align:center;
+ clip-path:polygon(0 50%,24px 0,100% 0,100% 100%,24px 100%);border-radius:0 10px 10px 0}
+#ans::placeholder{color:#2a2410;opacity:.35}
+#fb{min-height:3.2em;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:2px}
+#fb .v{font-weight:600}.ok{color:var(--good)}.no{color:var(--bad)}
+#fb .w{color:var(--muted);font-size:.95rem;font-style:italic}
+.stats{display:flex;justify-content:space-between;padding-top:14px;border-top:2px dashed var(--line);color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums;text-transform:uppercase;letter-spacing:.05em}
+</style>
+<main>
+<div class="card">
+  <header><h1>Price Listening</h1><p class="sub">Listen the price and type it.</p></header>
+  <div class="row"><button class="primary" id="play">▶ Play</button></div>
+  <form id="f" class="tag"><input id="ans" inputmode="numeric" autocomplete="off" placeholder="00.00" aria-label="Your answer"></form>
+  <div class="row one"><button id="check">Check</button><button id="next" hidden>Next →</button></div>
+  <label class="slow"><input type="checkbox" id="slow"> Slow speed</label>
+  <div id="fb"></div>
+  <div class="stats"><span id="score">Correct: 0 / 0</span><span id="streak">Streak: 0</span></div>
+</div>
+</main>
+<script>
+const ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+const w=n=>n<20?ones[n]:tens[Math.floor(n/10)]+(n%10?"-"+ones[n%10]:"");
+function say(d,c){if(c===0)return w(d);if(c<10)return w(d)+" oh "+ones[c];return w(d)+" "+w(c);}
+let cur,ok=0,tot=0,streak=0,answered=false;
+const $=id=>document.getElementById(id);
+function speak(){if(!window.speechSynthesis){$("fb").innerHTML='<span class="no">This browser cannot play speech. Try Chrome or Safari.</span>';return;}
+ speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(cur.text);u.lang="en-US";u.rate=$("slow").checked?0.6:0.95;
+ const v=speechSynthesis.getVoices().find(v=>v.lang==="en-US")||speechSynthesis.getVoices().find(v=>v.lang.startsWith("en"));if(v)u.voice=v;speechSynthesis.speak(u);}
+const teen=()=>13+Math.floor(Math.random()*7);
+function next(){const d=Math.random()<0.1?teen():1+Math.floor(Math.random()*35),c=Math.random()<0.1?teen():Math.floor(Math.random()*100);
+ cur={d,c,text:say(d,c),str:d+"."+String(c).padStart(2,"0")};answered=false;$("check").hidden=false;$("next").hidden=true;$("ans").value="";$("fb").innerHTML="";$("ans").focus();speak();}
+function check(){if(!cur||answered)return;const dg=$("ans").value.replace(/\D/g,"");if(!dg)return;
+ let d,c;if(dg.length<=2){d=+dg;c=0;}else{d=+dg.slice(0,-2);c=+dg.slice(-2);}const good=d===cur.d&&c===cur.c;
+ answered=true;$("check").hidden=true;$("next").hidden=false;$("next").focus();tot++;if(good){ok++;streak++;}else streak=0;
+ $("fb").innerHTML=(good?'<div class="v ok">Correct! '+cur.str+'</div>':'<div class="v no">Not quite. It was '+cur.str+'</div>')+'<div class="w">“'+cur.text+'”</div>';
+ $("score").textContent="Correct: "+ok+" / "+tot;$("streak").textContent="Streak: "+streak;}
+$("play").onclick=()=>{if(!cur)next();else speak();$("play").textContent="↻ Repeat";};
+$("next").onclick=()=>{next();$("play").textContent="↻ Repeat";};
+$("check").onclick=check;
+$("ans").addEventListener("input",e=>{const dg=e.target.value.replace(/\D/g,"").slice(0,4);e.target.value=dg.length>=3?dg.slice(0,-2)+"."+dg.slice(-2):dg;});
+$("f").onsubmit=e=>{e.preventDefault();answered?($("play").textContent="↻ Repeat",next()):check();};
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
+</script>
+</html>
