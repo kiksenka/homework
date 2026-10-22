@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fff7ee">
+<title>Coffee Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--page:#fff7ee;--card:#ffffff;--ink:#22201f;--muted:#857b74;--line:#efe6dd;
+--acc:#ff6a1f;--acc2:#ff9a4d;--soft:#fff0e4;--ok:#12a37b;--okbg:#e7f7f1;--bad:#e5484d;--badbg:#fdeced}
+*{box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans',sans-serif;color:var(--ink);background:var(--page);min-height:100vh;position:relative;overflow-x:hidden}
+body::before,body::after{content:'';position:fixed;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.55}
+body::before{width:420px;height:420px;background:#ffc9a3;top:-140px;left:-120px}
+body::after{width:380px;height:380px;background:#b9eadf;bottom:-140px;right:-120px}
+header{text-align:center;padding:44px 16px 18px}
+header h1{font-weight:600;font-size:2.6rem;margin:0;letter-spacing:-.02em;background:linear-gradient(90deg,#ff6a1f,#f2477e 55%,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{margin:8px 0 0;color:var(--muted);font-size:1rem;letter-spacing:.04em}
+.progress{max-width:720px;margin:0 auto 20px;padding:0 16px;display:flex;gap:6px}
+.progress span{flex:1;height:6px;border-radius:6px;background:#eadfd5;transition:.3s}
+main{max-width:720px;margin:0 auto;padding:0 16px 60px}
+.card{background:var(--card);border-radius:24px;padding:30px 26px;box-shadow:0 1px 2px rgba(60,30,10,.04),0 14px 40px rgba(120,60,20,.10);display:none;background:linear-gradient(90deg,var(--acc),var(--acc2)) top/100% 6px no-repeat,#fff}
+.card.active{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.num{display:inline-block;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);background:var(--soft);font-weight:600;padding:5px 12px;border-radius:999px}
+h2{font-weight:600;margin:12px 0 20px;font-size:1.4rem;line-height:1.3;letter-spacing:-.01em}
+.q{padding:14px 0;border-bottom:1px solid var(--line)}
+.q:last-of-type{border-bottom:0}
+.q .t{margin-bottom:10px;font-weight:500;line-height:1.7}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 18px;font:inherit;cursor:pointer;transition:.15s;color:var(--ink)}
+.opt:hover{border-color:var(--acc2);background:var(--soft)}
+.opt.sel{background:var(--acc);color:#fff;border-color:var(--acc)}
+.opt.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.wrong{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.fb{font-size:.9rem;margin-top:8px;min-height:1.1em;font-weight:500}
+.fb.ok{color:var(--ok)}.fb.no{color:var(--bad)}.fb.hint{color:var(--muted)}
+input[type=text]{font:inherit;width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid var(--line);background:#fcfaf8;outline:none;transition:.15s;color:var(--ink)}
+input[type=text]:focus{border-color:var(--acc);background:#fff;box-shadow:0 0 0 4px var(--soft)}
+input.right{border-color:var(--ok)!important;background:var(--okbg)!important}
+input.wrong{border-color:var(--bad);background:var(--badbg)}
+input.shown{border-color:var(--acc2);color:var(--acc);background:var(--soft)}
+.board{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-radius:18px;padding:20px 22px;margin-bottom:20px;box-shadow:0 10px 24px -10px var(--acc)}
+.board h3{margin:0 0 12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;font-size:.8rem;opacity:.9}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.25)}
+.row:last-child{border-bottom:0}
+.tiles,.answer{display:flex;flex-wrap:wrap;gap:8px;min-height:48px}
+.answer{border:1.5px dashed #e4d6ca;border-radius:14px;padding:8px;margin-bottom:10px;background:#fcfaf8}
+.tile{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:7px 13px;cursor:pointer;font:inherit;user-select:none;transition:.15s;box-shadow:0 2px 0 var(--line)}
+.tile:hover{border-color:var(--acc2)}
+.answer .tile{background:var(--soft);border-color:transparent;box-shadow:none}
+.answer.right{border-color:var(--ok);border-style:solid;background:var(--okbg)}
+.answer.wrong{border-color:var(--bad);background:var(--badbg)}
+.btns{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:26px}
+.back{margin-right:auto;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:1.2rem;cursor:pointer;line-height:1;transition:.15s}
+.back:hover{border-color:var(--acc);color:var(--acc)}
+button.main{font:inherit;font-weight:600;border:0;border-radius:999px;padding:12px 28px;cursor:pointer;background:var(--acc);color:#fff;transition:.15s;box-shadow:0 8px 18px -8px var(--acc)}
+button.main:hover{transform:translateY(-1px)}
+button.main#ck{background:#fff;color:var(--acc);box-shadow:inset 0 0 0 1.5px var(--acc)}
+button.main:disabled{opacity:.35;cursor:default;transform:none}
+.done{color:var(--ok);font-weight:600;margin-top:14px;text-align:right}
+.score{font-size:4rem;font-weight:600;text-align:center;margin:10px 0 20px;letter-spacing:-.03em;background:linear-gradient(90deg,#ff6a1f,#f2477e,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.br{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.br span:first-child{display:flex;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%}
+.small{color:var(--muted);font-size:.9rem}
+/* listening */
+.li{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:12px}.li .fb{grid-column:1/-1;margin-top:0}.li .fb:empty{display:none}
+.wr{grid-column:1/-1;padding-left:84px;color:var(--muted)}.wr input.gap{width:7.5em;margin:0 4px;padding:7px 10px;border-radius:10px}
+.play{width:46px;height:46px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--acc),var(--acc2));cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 14px -6px var(--acc);transition:.15s}
+.play:hover{transform:scale(1.06)}
+.play svg{width:20px;height:20px;fill:#fff;margin-left:2px}.ln{color:var(--muted);font-size:.85rem;min-width:1.2em;font-weight:600}
+/* gaps */
+.slot{display:inline-flex;flex-wrap:wrap;gap:4px;vertical-align:baseline;margin:0 3px}
+.chip{font:inherit;font-size:.9rem;padding:3px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+.chip:hover{border-color:var(--acc2)}
+.chip.sel{background:var(--acc);border-color:var(--acc);color:#fff}.chip.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through;background:var(--badbg)}
+.filled{color:var(--ok);font-weight:600;padding:0 4px;border-bottom:2px solid var(--ok)}
+.q .t input.gap{display:inline-block;width:6.5em;padding:4px 10px;margin:0 4px;border-radius:8px;vertical-align:baseline}
+/* chat */
+.chat{display:flex;flex-direction:column;gap:8px;min-height:70px;padding:16px;border-radius:18px;background:linear-gradient(180deg,var(--soft),#fff);border:1.5px solid var(--line);margin-bottom:16px}
+.chat:empty::before{content:'…';color:var(--muted);text-align:center;font-size:1.4rem}
+.pool{display:flex;flex-direction:column;gap:8px}
+.msg{max-width:82%;padding:10px 15px;border-radius:18px;cursor:pointer;line-height:1.35;border:1.5px solid var(--line);background:#fff;transition:.15s}
+.msg:hover{border-color:var(--acc2)}
+.msg b{display:block;font-size:.72rem;font-weight:600;color:var(--acc);margin-bottom:2px;width:max-content;letter-spacing:.04em}
+.chat .msg.w{align-self:flex-start;border-bottom-left-radius:5px}
+.chat .msg.a{align-self:flex-end;border-bottom-right-radius:5px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent;color:#fff}
+.chat .msg.a b{color:rgba(255,255,255,.85)}
+.pool .msg{max-width:100%}
+.msg.right{box-shadow:0 0 0 2px var(--ok)}.msg.wrong{box-shadow:0 0 0 2px var(--bad)}
+/* translations */
+h2.tr{cursor:pointer;text-decoration:underline dotted var(--acc2);text-decoration-thickness:2px;text-underline-offset:6px}
+.ru{background:var(--soft);border-radius:12px;padding:10px 14px;margin:-8px 0 18px;color:var(--ink);font-size:.95rem}
+b.who{cursor:pointer;position:relative;text-decoration:underline dotted;text-underline-offset:4px}
+.tip{position:absolute;left:0;top:calc(100% + 6px);background:var(--ink);color:#fff;font-style:normal;font-weight:400;font-size:.8rem;padding:4px 10px;border-radius:8px;white-space:nowrap;z-index:5;letter-spacing:0}
+/* menu */
+.sz{display:flex;gap:6px;flex-shrink:0}.sz i{font-style:normal;width:4.8rem;text-align:center;padding:0 1rem;letter-spacing:0;position:relative;font-variant-numeric:tabular-nums;font-weight:500}
+.say{cursor:pointer;border-radius:6px;transition:.15s;text-decoration:underline dotted rgba(255,255,255,.7);text-underline-offset:4px}.say:hover{background:rgba(255,255,255,.2)}
+.say::after{content:'';position:absolute;right:.2em;top:50%;transform:translateY(-50%);display:block;width:.75em;height:.75em;background:currentColor;opacity:.75;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z'/%3E%3C/svg%3E") center/contain no-repeat}
+.mh{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9;font-weight:600}
+.mh .sz i{text-align:center;font-weight:600}
+/* slider */
+.slider{position:relative;overflow:hidden}.cnt{font-size:.85rem;color:var(--muted);text-align:right;margin-bottom:8px;font-weight:600}
+.stage{min-height:150px}.slide{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:22px;animation:sin .35s ease}
+.slide .t{font-weight:600;margin-bottom:14px;font-size:1.15rem}
+.slide.out{animation:sout .3s ease forwards}
+@keyframes sin{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
+@keyframes sout{to{opacity:0;transform:translateX(-60px)}}
+/* memo */
+.memo{background:var(--soft);border-radius:18px;padding:18px;margin-bottom:20px;line-height:1.55}
+.memo h3{margin:0 0 6px;font-size:.8rem;font-weight:600;color:var(--acc);letter-spacing:.12em;text-transform:uppercase}
+.memo b{color:var(--acc)}
+.pat{background:#fff;border-radius:14px;padding:12px 14px;margin-top:10px}
+.pat>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:2px 0}
+.pat span{color:var(--muted);font-size:.85rem}
+.pat p.ex{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);font-size:.92rem}
+@media(max-width:520px){header h1{font-size:2.1rem}.card{padding:24px 16px}.wr{padding-left:0}
+ .mh{letter-spacing:0;font-size:.62rem}.sz i{width:3.9rem;padding:0 .9rem}.row:not(.mh) .sz i{font-size:.85rem}.sz{gap:2px}.board{padding:16px 14px}}
+</style>
+</head>
+<body>
+<header><h1>Coffee Time</h1><p>Times · Prices</p></header>
+<div class="progress" id="prog"></div>
+<main id="main"></main>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const norm=s=>s.toLowerCase().replace(/[’']/g,"'").replace(/[.,!?]/g,'').replace(/-/g,' ').replace(/\s+/g,' ').trim();
+const speakQ=(parts)=>{try{speechSynthesis.cancel();const vs=speechSynthesis.getVoices();const v=vs.find(v=>/^en(-|_)GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang));
+  parts.forEach((t,k)=>{const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.85;u.pitch=k%2?0.8:1.15;if(v)u.voice=v;speechSynthesis.speak(u)})}catch(e){}};
+const results=[]; // {title, got, total}
+const tasks=[];
+
+/* ---------- TASK 1: price board (one question at a time) ---------- */
+tasks.push({title:"Prices",build(c){
+  const M=[["espresso",[1.90,2.05,2.40]],["americano",[2.10,2.65,3.05]],["cappuccino",[2.80,3.40,4.25]],["latte",[3.15,4.10,4.70]],
+   ["tea with lemon",[1.80,2.05,2.50]],["tea with milk",[1.70,2.15,2.60]],["fresh orange juice",[3.75,4.50,5.75]]];
+  const X=[["cake",3.50],["sandwich",6.90]];
+  const f=n=>n.toFixed(2);
+  c.innerHTML=`<div class="num">Task 1</div><h2>How much is it?</h2><p class="small" style="margin-top:-8px">Click a price to listen.</p>
+  <div class="board"><h3>Menu</h3>
+   <div class="row mh"><span></span><span class="sz"><i>small</i><i>medium</i><i>large</i></span></div>
+   ${M.map(([n,p])=>`<div class="row"><span>${n}</span><span class="sz">${p.map(x=>`<i>${f(x)}</i>`).join('')}</span></div>`).join('')}
+   ${X.map(([n,p])=>`<div class="row"><span>${n}</span><span class="sz"><i></i><i></i><i>${f(p)}</i></span></div>`).join('')}</div>
+  <div class="slider"><div class="cnt"></div><div class="stage"></div></div>`;
+  const ones=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+  const tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  const w=n=>n<20?ones[n]:tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:'');
+  const say=x=>{const e=Math.floor(x+1e-6),c2=Math.round((x-e)*100);return w(e)+' '+(c2<10?'oh '+ones[c2]:w(c2))};
+  const speak=t=>{try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.85;const v=speechSynthesis.getVoices().find(v=>/^en(-|_)GB/i.test(v.lang))||speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}};
+  c.querySelectorAll('.board .row:not(.mh) i').forEach(el=>{const x=parseFloat(el.textContent);if(isNaN(x))return;el.classList.add('say');el.onclick=()=>speak(say(x))});
+  const sizes=["small","medium","large"];let Q=[];
+  M.forEach(([n,p])=>p.forEach((x,i)=>Q.push([`How much is a ${sizes[i]} ${n}?`,say(x),p.map(say)])));
+  const all=[...new Set([...M.flatMap(m=>m[1]),...X.map(x=>x[1])])];
+  X.forEach(([n,p])=>{const alt=all.filter(y=>y!==p).sort((a,b)=>Math.abs(a-p)-Math.abs(b-p)).slice(0,2).map(say);Q.push([`How much is ${/^[aeiou]/.test(n)?'an':'a'} ${n}?`,say(p),[say(p),...alt]])});
+  Q=shuffle(Q).slice(0,20);
+  const stage=c.querySelector('.stage'),cnt=c.querySelector('.cnt');let k=0,ok=0,miss=false;
+  function show(){cnt.textContent=`${k+1} / ${Q.length}`;const [t,ans,opts]=Q[k];miss=false;
+    const d=document.createElement('div');d.className='slide';
+    d.innerHTML=`<div class="t">${t}</div><div class="opts"></div><div class="fb"></div>`;
+    shuffle([...new Set(opts)]).forEach(x=>{const bt=document.createElement('button');bt.className='opt';bt.textContent=x;
+      bt.onclick=()=>{speak(x);if(d.dataset.done)return;const fb=d.querySelector('.fb');
+        if(x===ans){bt.classList.add('right');fb.className='fb ok';fb.textContent="That's right!";d.dataset.done=1;if(!miss)ok++;
+          setTimeout(()=>{d.classList.add('out');k++;setTimeout(()=>{d.remove();k<Q.length?show():end()},300)},700)}
+        else{miss=true;bt.classList.add('wrong');fb.className='fb no';fb.textContent="That's wrong!"}};
+      d.querySelector('.opts').appendChild(bt)});
+    stage.appendChild(d)}
+  function end(){cnt.textContent='';c._done&&c._done();stage.innerHTML=`<div class="slide"><div class="t">Great job!</div><div class="small">${ok} / ${Q.length}</div></div>`}
+  show();
+  c.querySelector('.slider').scrollIntoView;
+  return {kind:'choice',check(){return{ok,total:Q.length,all:k>=Q.length}},hideCheck:true};
+}});
+
+/* ---------- TASK 2: Tom's day (open, how long / what time) ---------- */
+tasks.push({title:"Tom's day",build(c){
+  c.innerHTML=`<div class="num">Task 2</div><h2>Tom's day. Write the answers in words.</h2>
+  <div class="memo"><h3>Как отвечать</h3>
+   <div class="pat"><div><b>What time is …?</b><span>Во сколько?</span></div><div><p style="margin:0">It's <b>from</b> … <b>to</b> … <span>с … до …</span></p></div><p class="ex">What time is breakfast? — It's <b>from</b> eight <b>to</b> eight twenty.</p></div>
+   <div class="pat"><div><b>How long is …?</b><span>Сколько длится?</span></div><div>It's … minutes.</div><p class="ex">How long is breakfast? — It's twenty minutes.</p></div>
+   <div class="pat"><div><b>Where is … at …?</b><span>Где … в … часов?</span></div><div>He's / She's at …</div><p class="ex">Where is Anna at eight? — She's at home.</p></div></div>
+  <div class="board"><h3>Tom · Monday</h3>
+   <div class="row"><span>breakfast</span><span>7.30 – 7.50</span></div>
+   <div class="row"><span>at work</span><span>9.00 – 5.30</span></div>
+   <div class="row"><span>coffee break</span><span>11.15 – 11.30</span></div>
+   <div class="row"><span>lunch</span><span>1.00 – 1.40</span></div>
+   <div class="row"><span>dinner</span><span>7.10 – 7.55</span></div></div>
+`;
+  const Q=[["What time is the coffee break?",["it's from eleven fifteen to eleven thirty","from eleven fifteen to eleven thirty"],"From … to …","It's from eleven fifteen to eleven thirty."],
+   ["How long is the coffee break?",["it's fifteen minutes","fifteen minutes","15 minutes","it's 15 minutes"],"… minutes","It's fifteen minutes."],
+   ["What time is lunch?",["it's from one to one forty","from one to one forty","it's from one o'clock to one forty","from one o'clock to one forty"],"From … to …","It's from one to one forty."],
+   ["How long is lunch?",["it's forty minutes","forty minutes","40 minutes","it's 40 minutes"],"… minutes","It's forty minutes."],
+   ["How long is dinner?",["it's forty five minutes","forty five minutes","45 minutes","it's 45 minutes"],"… minutes","It's forty-five minutes."],
+   ["Where is Tom at ten?",["he's at work","at work","he is at work"],"He's at …","He's at work."],
+   ["What time is breakfast?",["it's from seven thirty to seven fifty","from seven thirty to seven fifty"],"From … to …","It's from seven thirty to seven fifty."],
+   ["How long is breakfast?",["it's twenty minutes","twenty minutes","20 minutes","it's 20 minutes"],"… minutes","It's twenty minutes."],
+   ["What time is dinner?",["it's from seven ten to seven fifty five","from seven ten to seven fifty five"],"From … to …","It's from seven ten to seven fifty-five."],
+   ["Where is Tom at three?",["he's at work","at work","he is at work"],"He's at …","He's at work."]];
+  Q.splice(0,Q.length,...[Q[6],Q[7],Q[0],Q[1],Q[2],Q[3],Q[5],Q[8],Q[4],Q[9]]);
+  return openTask(c,Q);
+}});
+
+/* ---------- TASK 3: listening — time or price? + write it ---------- */
+const W1=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"],W10=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+const nw=n=>n<20?W1[n]:W10[Math.floor(n/10)]+(n%10?' '+W1[n%10]:'');
+const toWords=v=>{v=v.trim();let m=v.match(/^(\d{1,2})(?:[.:,](\d{2}))?$/);if(!m)return norm(v);const h=+m[1],mm=m[2]?+m[2]:0;
+  return norm(nw(h)+(m[2]&&mm?' '+(mm<10?'oh '+W1[mm]:nw(mm)):''))};
+tasks.push({title:"Time or price?",build(c){
+  c.innerHTML=`<div class="num">Task 3</div><h2 class="tr">Listen. Is it about time or price?</h2><div class="ru" hidden>Послушай. Это про время или про цену?</div><div class="lst"></div>`;
+  c.querySelector('h2.tr').onclick=()=>{const r=c.querySelector('.ru');r.hidden=!r.hidden};
+  // tpl: ___ = input; answers in order
+  const Q=[[["What time is breakfast?","From eight to eight twenty."],"time","from ___ to ___",["eight","eight twenty"]],
+   [["How much is a large latte?","Four seventy."],"price","___",["four seventy"]],
+   [["How long is the coffee break?","Fifteen minutes."],"time","___ minutes",["fifteen"]],
+   [["A small americano is two ten."],"price","___",["two ten"]],
+   [["Dinner is from seven to seven forty."],"time","from ___ to ___",["seven","seven forty"]],
+   [["How much is it?","It's eight fifteen."],"price","___",["eight fifteen"]],
+   [["Lunch is at one thirty."],"time","at ___",["one thirty"]],
+   [["The sandwich is six ninety."],"price","___",["six ninety"]],
+   [["Tea with lemon, please.","That's two oh five."],"price","___",["two oh five"]],
+   [["What time is the number 19 bus?","It's at nine fifty."],"time","at ___",["nine fifty"]]];
+  const box=c.querySelector('.lst');
+  const items=shuffle(Q).map(([parts,ans,tpl,vals],k)=>{const d=document.createElement('div');d.className='q li';
+    d.innerHTML=`<button class="play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><span class="ln">${k+1}</span><div class="opts"><button class="opt">time</button><button class="opt">price</button></div>
+      <div class="wr">${tpl.replace(/___/g,'<input type="text" class="gap" autocomplete="off" spellcheck="false">')}</div><div class="fb"></div>`;
+    d.querySelector('.play').onclick=()=>speakQ(parts);
+    let sel=null;d.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{d.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel','right','wrong'));b.classList.add('sel');sel=b.textContent;d.querySelector('.fb').textContent=''});
+    box.appendChild(d);return{d,ans,vals,inps:[...d.querySelectorAll('input')],first:[null,null]}});
+  let tries=0;
+  return {kind:'choice',check(){tries++;let all=true,score=0;
+    items.forEach(i=>{const fb=i.d.querySelector('.fb');const b=i.d.querySelector('.opt.sel, .opt.right');let msg=[];
+      let cOk=false;if(b){cOk=b.textContent===i.ans;b.classList.remove('sel');b.classList.add(cOk?'right':'wrong')}
+      if(i.first[0]===null&&b)i.first[0]=cOk;
+      let wOk=true;i.inps.forEach((inp,n)=>{const r=toWords(inp.value)===norm(i.vals[n]);inp.classList.toggle('right',r);inp.classList.toggle('wrong',!r);if(r)inp.readOnly=true;
+        else{wOk=false;if(tries>=2){inp.value=i.vals[n];inp.readOnly=true;inp.classList.remove('wrong');inp.classList.add('shown')}}});
+      if(i.first[1]===null)i.first[1]=wOk;
+      if(!cOk)all=false;
+      fb.className='fb '+(cOk&&wOk?'ok':'no');fb.textContent=(b||i.inps.some(x=>x.value))?(cOk&&wOk?"That's right!":"That's wrong!"):'';
+      if(i.inps.every(x=>x.readOnly)&&cOk&&!wOk&&tries>=2)fb.textContent='';
+      score+=(i.first[0]?1:0)+(i.first[1]?1:0)});
+    return{ok:score,total:items.length*2,all}}};
+}});
+
+/* ---------- TASK 3: word order ---------- */
+tasks.push({title:"Word order",build(c){
+  c.innerHTML=`<div class="num">Task 4</div><h2>Put the words in order.</h2><div id="wo"></div>`;
+  const S=["What would you like?","A small cappuccino, please.","Is it hot or cold?","How much is the cake?","How long is your coffee break?","What time is dinner?","Tea with milk and sugar, please."];
+  const box=c.querySelector('#wo'); const items=[];
+  shuffle(S).forEach(s=>{
+    const d=document.createElement('div');d.className='q';
+    d.innerHTML=`<div class="answer"></div><div class="tiles"></div><div class="fb"></div>`;
+    const ans=d.querySelector('.answer'),til=d.querySelector('.tiles');
+    let words=s.split(' '); let sh=shuffle(words); while(sh.join(' ')===s&&words.length>1) sh=shuffle(words);
+    sh.forEach(w=>{const t=document.createElement('span');t.className='tile';t.textContent=w;
+      t.onclick=()=>{(t.parentNode===til?ans:til).appendChild(t);ans.classList.remove('right','wrong');d.querySelector('.fb').textContent=''};til.appendChild(t)});
+    box.appendChild(d); items.push({d,ans,s});
+  });
+  return {check(){let ok=0;items.forEach(i=>{const got=[...i.ans.children].map(t=>t.textContent).join(' ');const r=got===i.s;
+    const fb=i.d.querySelector('.fb');i.ans.classList.toggle('right',r);i.ans.classList.toggle('wrong',!r&&got!=='');
+    fb.className='fb '+(r?'ok':'no');fb.textContent=r?"That's right!":(got?"That's wrong!":'');if(r)ok++});return{ok,total:items.length,all:ok===items.length}},kind:'choice'};
+}});
+
+/* ---------- TASK 4: build the dialogue ---------- */
+tasks.push({title:"At the café",build(c){
+  c.innerHTML=`<div class="num">Task 5</div><h2 class="tr">At the café. Click the lines in the right order.</h2><div class="ru" hidden>В кафе. Нажимай на реплики в правильном порядке.</div>
+  <div class="chat"></div><div class="pool"></div><div class="fb" id="dfb"></div>`;
+  const L=[["Waiter","Hi! What would you like?"],["Anna","A large latte, please."],["Waiter","Hot or cold?"],["Anna","Hot, please. And a cake."],["Waiter","Here's your latte and cake."],["Anna","Thank you! How much is it?"],["Waiter","It's eight fifteen."],["Anna","Thanks."],["Waiter","You're welcome."]];
+  const chat=c.querySelector('.chat'),pool=c.querySelector('.pool'),fb=c.querySelector('#dfb');
+  c.querySelector('h2.tr').onclick=()=>{const r=c.querySelector('.ru');r.hidden=!r.hidden};
+  shuffle(L.map((l,i)=>[...l,i])).forEach(([who,txt,i])=>{
+    const d=document.createElement('div');d.className='msg '+(who==='Waiter'?'w':'a');d.dataset.i=i;
+    d.innerHTML=`<b class="${who==='Waiter'?'who':''}">${who}${who==='Waiter'?'<em class="tip" hidden>официант</em>':''}</b><span>${txt}</span>`;
+    const wb=d.querySelector('b.who');if(wb)wb.onclick=e=>{e.stopPropagation();const t=wb.querySelector('.tip');const h=t.hidden;c.querySelectorAll('.tip').forEach(x=>x.hidden=true);t.hidden=!h};
+    d.onclick=()=>{(d.parentNode===pool?chat:pool).appendChild(d);fb.textContent='';chat.querySelectorAll('.msg').forEach(m=>m.classList.remove('right','wrong'))};
+    pool.appendChild(d)});
+  return {kind:'choice',check(){const got=[...chat.children].map(m=>+m.dataset.i);let ok=0;
+    [...chat.children].forEach((m,k)=>{const r=+m.dataset.i===k;m.classList.toggle('right',r);m.classList.toggle('wrong',!r);if(r)ok++});
+    const all=ok===L.length;fb.className='fb '+(all?'ok':'no');fb.textContent=got.length?(all?"That's right!":"That's wrong!"):'';
+    return{ok,total:L.length,all}}};
+}});
+
+/* ---------- TASK 5: odd one out ---------- */
+tasks.push({title:"Odd one out",build(c){
+  c.innerHTML=`<div class="num">Task 6</div><h2 class="tr">Which word is different?</h2><div class="ru" hidden>Какое слово лишнее?</div>`;
+  c.querySelector('h2.tr').onclick=()=>{const r=c.querySelector('.ru');r.hidden=!r.hidden};
+  const Q=[["","watermelon",["espresso","latte","watermelon","americano"]],
+   ["","Monday",["breakfast","lunch","Monday","dinner"]],
+   ["","husband",["small","medium","large","husband"]],
+   ["","ticket",["sugar","milk","lemon","ticket"]],
+   ["","minutes",["euros","dollars","rubles","minutes"]],
+   ["","bus stop",["flat","house","apartment","bus stop"]],
+   ["","their",["sandwich","cake","apple","their"]]];
+  return choiceTask(c,shuffle(Q).map((q,i)=>[`${i+1}.`,q[1],shuffle(q[2])]));
+}});
+
+/* ---------- TASK 6: dialogue gaps (type, then choose) ---------- */
+tasks.push({title:"Coffee break",build(c){
+  c.innerHTML=`<div class="num">Task 7</div><h2 class="tr">Complete the conversation. One word in each gap.</h2><div class="ru" hidden>Дополни диалог. В каждый пропуск — одно слово.</div>`;
+  c.querySelector('h2.tr').onclick=()=>{const r=c.querySelector('.ru');r.hidden=!r.hidden};
+  const Q=[["Max: Hi, Kate! Where ___ you?",["are"],["am","is","are"]],
+   ["Kate: I'm ___ work. It's my coffee break.",["at"],["at","in","on"]],
+   ["Max: Really? How ___ is it?",["long"],["long","much","old"]],
+   ["Kate: It's twenty minutes, ___ eleven to eleven twenty.",["from"],["from","to","at"]],
+   ["Max: What's ___ coffee? Americano?",["your"],["my","your","her"]],
+   ["Kate: No, a cappuccino. And ___ sandwich.",["a"],["a","an","the"]],
+   ["Max: Nice! And what time is ___? At one?",["lunch"],["breakfast","lunch","dinner"]],
+   ["Kate: Yes, ___ right!",["that's","thats","that is"],["that's","it's","he's"]]];
+  const items=Q.map(([t,acc,opts])=>{const d=document.createElement('div');d.className='q';
+    d.innerHTML=`<div class="t">${t.replace('___','<span class="slot"><input type="text" class="gap" autocomplete="off" spellcheck="false"></span>')}</div><div class="fb"></div>`;
+    c.appendChild(d);return{d,slot:d.querySelector('.slot'),inp:d.querySelector('input'),acc,opts,mode:'type',done:false,first:null}});
+  return {kind:'choice',check(){let ok=0;items.forEach(i=>{const fb=i.d.querySelector('.fb');
+    if(i.done){ok++;return}
+    if(i.mode==='type'){const r=i.acc.includes(norm(i.inp.value));if(i.first===null)i.first=r;
+      if(r){i.done=true;ok++;i.inp.classList.add('right');i.inp.readOnly=true;fb.className='fb ok';fb.textContent="That's right!"}
+      else{i.mode='pick';fb.className='fb';fb.textContent='';
+        i.slot.innerHTML=shuffle(i.opts).map(o=>`<button class="chip">${o}</button>`).join('');
+        i.slot.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{i.slot.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel','wrong'));ch.classList.add('sel');fb.textContent=''})}}
+    else{const sel=i.slot.querySelector('.chip.sel');if(!sel)return;const r=i.acc.includes(norm(sel.textContent));
+      if(r){i.done=true;ok++;i.slot.innerHTML=`<b class="filled">${sel.textContent}</b>`;fb.className='fb ok';fb.textContent="That's right!"}
+      else{sel.classList.remove('sel');sel.classList.add('wrong');fb.className='fb no';fb.textContent="That's wrong!"}}});
+    const first=items.filter(i=>i.first).length;
+    return{ok:first,total:items.length,all:ok===items.length}}};
+}});
+
+/* ---------- generic task engines ---------- */
+function choiceTask(c,Q){
+  const items=[];
+  Q.forEach(([t,ans,opts])=>{const d=document.createElement('div');d.className='q';
+    d.innerHTML=`${t?`<div class="t">${t}</div>`:''}<div class="opts"></div><div class="fb"></div>`;
+    const o=d.querySelector('.opts');let sel=null;
+    opts.forEach(x=>{const b=document.createElement('button');b.className='opt';b.textContent=x;
+      b.onclick=()=>{o.querySelectorAll('.opt').forEach(y=>y.classList.remove('sel','right','wrong'));b.classList.add('sel');sel=x;d.querySelector('.fb').textContent=''};o.appendChild(b)});
+    c.appendChild(d);items.push({d,ans,get sel(){return sel}});
+  });
+  return {kind:'choice',check(){let ok=0;items.forEach(i=>{const fb=i.d.querySelector('.fb');const b=i.d.querySelector('.opt.sel');
+    if(!b){fb.textContent='';return}const r=i.sel===i.ans;b.classList.remove('sel');b.classList.add(r?'right':'wrong');
+    fb.className='fb '+(r?'ok':'no');fb.textContent=r?"That's right!":"That's wrong!";if(r)ok++});return{ok,total:items.length,all:ok===items.length}}};
+}
+function openTask(c,Q){
+  const items=[];
+  Q.forEach(([t,acc,hint,show])=>{const d=document.createElement('div');d.className='q';
+    const inl=t.includes('___');
+    d.innerHTML=inl?`<div class="t">${t.replace('___','<input type="text" class="gap" autocomplete="off" spellcheck="false">')}</div><div class="fb"></div>`:`<div class="t">${t}</div><input type="text" autocomplete="off" spellcheck="false"><div class="fb"></div>`;
+    c.appendChild(d);items.push({d,inp:d.querySelector('input'),acc:acc.map(norm),hint,show});
+  });
+  let tries=0;
+  return {kind:'open',check(){tries++;let ok=0;items.forEach(i=>{const fb=i.d.querySelector('.fb');const r=i.acc.includes(norm(i.inp.value));
+    i.inp.classList.toggle('right',r);i.inp.classList.toggle('wrong',!r);
+    if(r){ok++;fb.className='fb ok';fb.textContent="That's right!";i.inp.readOnly=true}
+    else if(tries===1){fb.className='fb hint';fb.textContent=i.hint}
+    else{fb.className='fb no';fb.textContent='Answer: '+i.show}});
+    return{ok,total:items.length,all:ok===items.length||tries>=2,tries}}};
+}
+
+/* ---------- flow ---------- */
+const prog=$('#prog');tasks.forEach(()=>prog.appendChild(document.createElement('span')));
+let cur=-1;const cards=[];
+const PAL=[['#ff6a1f','#ffa04d','#fff0e4'],['#f2477e','#ff7aa2','#ffe9f0'],['#0fa89a','#3cc9b5','#e3f6f3'],['#4c6fff','#7f9bff','#eaeeff'],['#8b5cf6','#b18cff','#f1ebff'],['#e8890c','#f7b33c','#fff4df'],['#ef4444','#ff7a59','#ffecea']];
+const paint=(el,i)=>{const p=PAL[i%PAL.length];el.style.setProperty('--acc',p[0]);el.style.setProperty('--acc2',p[1]);el.style.setProperty('--soft',p[2])};
+function show(i){
+  cur=i;$('#main').querySelectorAll('section').forEach(x=>x.style.display='none');
+  [...prog.children].forEach((s,k)=>s.style.background=k<=cur?PAL[k%PAL.length][0]:'');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(cur>=tasks.length){const f=$('#fin');if(f)f.remove();return finish()}
+  if(cards[cur]){cards[cur].style.display='';return}
+  const c=document.createElement('section');c.className='card active';paint(c,cur);$('#main').appendChild(c);cards[cur]=c;
+  const idx=cur;const eng=tasks[idx].build(c);let firstScore=null;
+  const bt=document.createElement('div');bt.className='btns';
+  bt.innerHTML=`${idx>0?'<button class="back" aria-label="Back">&#8592;</button>':''}<button class="main" id="ck">Check</button><button class="main" id="nx" hidden>Next</button>`;c.appendChild(bt);
+  c._done=()=>{bt.querySelector('#nx').hidden=false};
+  if(eng.hideCheck){bt.querySelector('#ck').style.display='none';bt.querySelector('#nx').hidden=false}
+  const dn=document.createElement('div');dn.className='done';c.appendChild(dn);
+  bt.querySelector('#ck').onclick=()=>{bt.querySelector('#nx').hidden=false;const r=eng.check();if(firstScore===null)firstScore=r.ok;
+    if(eng.kind==='open'&&r.tries===1)firstScore=r.ok;
+    if(r.all){bt.querySelector('#ck').disabled=eng.kind==='open';dn.textContent=r.ok===r.total?'Great job!':'';
+      results[idx]={title:tasks[idx].title,got:eng.kind==='open'?r.ok:firstScore,total:r.total}}};
+  bt.querySelector('#nx').onclick=()=>{if(!results[idx]){const r=eng.check();results[idx]={title:tasks[idx].title,got:firstScore===null?r.ok:firstScore,total:r.total}}show(idx+1)};
+  const bk=bt.querySelector('.back');if(bk)bk.onclick=()=>show(idx-1);
+}
+function next(){show(cur+1)}
+function finish(){
+  const got=results.reduce((a,r)=>a+r.got,0),tot=results.reduce((a,r)=>a+r.total,0);
+  const c=document.createElement('section');c.className='card active';c.id='fin';
+  c.innerHTML=`<div class="num">Finish</div><h2>Great job!</h2><div class="score">${got} / ${tot}</div>`+
+   results.map((r,i)=>`<div class="br"><span><i class="dot" style="background:${PAL[i%PAL.length][0]}"></i>${i+1}. ${r.title}</span><span>${r.got} / ${r.total}</span></div>`).join('')+
+   `<div class="btns" style="justify-content:flex-start"><button class="back" aria-label="Back">&#8592;</button></div>`;
+  c.querySelector('.back').onclick=()=>show(tasks.length-1);
+  $('#main').appendChild(c);
+}
+next();
+</script>
+</body>
+</html>
