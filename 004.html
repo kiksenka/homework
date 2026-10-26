@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Numbers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Minimal single column: number, slots, letter keys */
+:root{--bg:#f7f8f9;--fg:#16191c;--muted:#7a828a;--line:#d9dde1;--key:#ffffff;--accent:#2563c9;--ok:#1f8a5b;--bad:#c9443b;--font:"IBM Plex Sans",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121416;--fg:#eceef0;--muted:#8a929a;--line:#30353a;--key:#1b1e21;--accent:#6c9cf0;--ok:#4cc08a;--bad:#ef7369;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121416;--fg:#eceef0;--muted:#8a929a;--line:#30353a;--key:#1b1e21;--accent:#6c9cf0;--ok:#4cc08a;--bad:#ef7369;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px;box-sizing:border-box}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:24px;min-height:100%}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:none}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font-size:1.75rem;font-weight:600;margin:24px 0 0;letter-spacing:-.01em}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:420px){.grid{grid-template-columns:repeat(4,1fr)}}
+.setbtn{aspect-ratio:1;border-radius:8px;background:var(--key);border:1px solid var(--line);font-size:1.3rem;font-weight:500}
+.setbtn:hover{border-color:var(--fg)}
+.setbtn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.top{display:flex;align-items:center;gap:14px}
+.x{font-size:1.4rem;color:var(--muted);padding:4px 6px}
+.bar{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--fg);transition:width .3s}
+.digit{font-size:clamp(4.5rem,22vw,7rem);font-weight:500;text-align:center;line-height:1;margin-top:16px;font-variant-numeric:tabular-nums}
+.slots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:52px}
+.slot{width:34px;height:48px;border-bottom:2px solid var(--line);font-size:1.7rem;font-weight:500;display:flex;align-items:center;justify-content:center;padding:0}
+.slot.fixed{border-color:transparent;width:18px;color:var(--muted)}
+.slot.ok{color:var(--ok);border-color:var(--ok)}
+.slots.shake .slot:not(.fixed){border-color:var(--bad)}
+.slots.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:auto}
+.tile{width:48px;height:52px;border-radius:8px;background:var(--key);border:1px solid var(--line);font-size:1.5rem}
+.tile:hover{border-color:var(--fg)}
+.tile.used{visibility:hidden}
+.next{width:100%;padding:14px;border-radius:8px;background:var(--fg);color:var(--bg);font-size:1.1rem;font-weight:500}
+.end{text-align:center;font-size:1.75rem;font-weight:600;margin-top:40px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const SETS=[[4,15,5,0,11,13,3,57,82,59],[1,19,9,10,7,8,79,32,77,92],[12,2,6,16,18,20,17,40,58,72],[14,10,6,15,8,1,95,21,34,89],[4,11,17,7,13,9,20,46,91,85],[3,18,16,2,0,5,62,47,37,87],[14,12,19,18,17,9,7,78,45,43],[12,6,19,10,3,5,83,80,28,98],[4,11,1,20,16,13,8,33,52,38],[14,2,0,15,19,8,36,73,22,63]];
+const ONES=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const TENS=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+const word=n=>n<20?ONES[n]:n===100?"one hundred":TENS[Math.floor(n/10)]+(n%10?"-"+ONES[n%10]:"");
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const app=document.getElementById("app");
+let done=new Set();try{done=new Set(JSON.parse(localStorage.getItem("done")||"[]"))}catch(e){}
+const save=()=>{try{localStorage.setItem("done",JSON.stringify([...done]))}catch(e){}};
+function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+
+function menu(){
+  app.innerHTML=`<h1>Numbers</h1><div class="grid">${SETS.map((_,i)=>`<button class="setbtn ${done.has(i)?"done":""}" data-i="${i}">${i+1}</button>`).join("")}</div>`;
+  app.querySelectorAll(".setbtn").forEach(b=>b.onclick=()=>play(+b.dataset.i));
+}
+
+function play(si){
+  const queue=shuffle(SETS[si]);let k=0;
+  const step=()=>{
+    if(k===queue.length){done.add(si);save();app.innerHTML=`<div class="end">Done</div><button class="next" id="b">Back</button>`;document.getElementById("b").onclick=menu;return}
+    const n=queue[k],w=word(n),chars=[...w];
+    const letters=shuffle(chars.map((c,i)=>({c,i})).filter(o=>/[a-z]/.test(o.c)));
+    const fill=chars.map(c=>/[a-z]/.test(c)?null:c);   // null = empty slot
+    const from=chars.map(()=>null);                       // which tile filled the slot
+    app.innerHTML=`<div class="top"><button class="x" id="x" aria-label="Back">✕</button><div class="bar"><i style="width:${k*10}%"></i></div></div>
+      <div class="digit">${n}</div><div class="slots" id="s"></div><div class="tiles" id="t"></div>`;
+    document.getElementById("x").onclick=menu;
+    const S=document.getElementById("s"),T=document.getElementById("t");
+    const render=()=>{
+      S.innerHTML=chars.map((c,i)=>/[a-z]/.test(c)?`<button class="slot" data-i="${i}">${fill[i]||""}</button>`:`<span class="slot fixed">${c===" "?"":c}</span>`).join("");
+      T.innerHTML=letters.map((o,j)=>`<button class="tile ${from.includes(j)?"used":""}" data-j="${j}">${o.c}</button>`).join("");
+      S.querySelectorAll("button").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(fill[i]){fill[i]=null;from[i]=null;render()}});
+      T.querySelectorAll("button").forEach(b=>b.onclick=()=>{const j=+b.dataset.j,i=fill.indexOf(null);if(i<0)return;fill[i]=letters[j].c;from[i]=j;render();check()});
+    };
+    const check=()=>{
+      if(fill.includes(null))return;
+      if(fill.join("")===w){
+        S.querySelectorAll(".slot").forEach(e=>e.classList.add("ok"));say(w);
+        T.innerHTML=`<button class="next" id="nx">Next</button>`;document.getElementById("nx").onclick=()=>{k++;step()};document.getElementById("nx").focus();
+      }else{
+        S.classList.add("shake");
+        setTimeout(()=>{S.classList.remove("shake");chars.forEach((c,i)=>{if(from[i]!==null&&fill[i]!==c){fill[i]=null;from[i]=null}});render()},400);
+      }
+    };
+    render();
+  };
+  step();
+}
+menu();
+</script>
+</body>
+</html>
