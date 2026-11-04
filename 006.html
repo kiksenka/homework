@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucy's Monday</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: coursebook page. Purple tab band on top, one task per screen inside an orange-bordered white card on a pale lime ground. */
+:root {
+  --purple: #5f2f93;
+  --purple-deep: #46206f;
+  --orange: #f28c1b;
+  --yellow: #f9c933;
+  --lime: #d9e37c;
+  --lime-soft: #f0f4cf;
+  --cream: #fff6e2;
+  --ink: #2a2233;
+  --ink-soft: #6b6275;
+  --ok: #2f9a45;
+  --ok-bg: #dff3e1;
+  --bad: #d64545;
+  --bad-bg: #fde1e1;
+  --font: "Fira Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--lime-soft);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 20px;
+  line-height: 1.35;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 28px;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; }
+
+.band {
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--purple);
+  border-top: 8px solid var(--orange);
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+}
+.band-in { max-width: 1000px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.tab {
+  width: 54px; height: 54px; border-radius: 14px; border: 3px solid var(--yellow);
+  background: #fff; color: var(--orange); font-weight: 800; font-size: 28px; line-height: 1;
+}
+.tab[aria-selected="true"] { background: var(--orange); border-color: var(--orange); color: #fff; }
+.tab:hover { border-color: #fff; }
+.band .gap-fill { flex: 1; }
+.teacher-btn {
+  background: transparent; border: 2px solid rgba(255,255,255,.55); color: #fff; border-radius: 12px;
+  padding: 8px 14px; font-size: 16px; font-weight: 500;
+}
+.teacher-btn[aria-pressed="true"] { background: #fff; color: var(--purple); }
+
+main { max-width: 1000px; margin: 22px auto 0; }
+.card {
+  background: #fff; border: 3px solid var(--orange); border-radius: 20px;
+  padding: 24px clamp(16px, 3vw, 32px) 28px;
+}
+.head { display: flex; gap: 14px; align-items: baseline; margin: 0 0 20px; }
+.head .n { color: var(--orange); font-weight: 800; font-size: 34px; line-height: 1; }
+.head h2 { margin: 0; font-size: 24px; font-weight: 700; text-wrap: balance; }
+
+/* Task 1 */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.opt {
+  display: flex; gap: 12px; align-items: center; text-align: left; width: 100%;
+  border: 2px solid var(--lime); background: #fff; border-radius: 12px; padding: 9px 12px; min-height: 52px;
+}
+.opt:hover:not(:disabled) { border-color: var(--orange); }
+.opt.sel { border-color: var(--orange); background: var(--cream); box-shadow: 0 0 0 3px rgba(242,140,27,.25); }
+.opt.done { background: var(--ok-bg); border-color: var(--ok); cursor: default; }
+.opt .tag {
+  flex: none; min-width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  font-weight: 800; font-size: 17px; background: var(--cream); color: var(--orange);
+}
+.opt.done .tag { background: var(--ok); color: #fff; }
+.opt .tx { min-width: 0; }
+.opt.chunk .tx { font-weight: 700; }
+.opt .badge { margin-left: auto; flex: none; font-weight: 800; color: var(--ok); }
+
+/* Task 2 */
+.bank { display: flex; flex-wrap: wrap; gap: 10px; background: var(--cream); border: 2px solid var(--orange); border-radius: 14px; padding: 14px; margin-bottom: 22px; }
+.chip { border: 2px solid var(--orange); background: #fff; border-radius: 999px; padding: 6px 18px; font-weight: 700; color: var(--purple); }
+.chip.sel { background: var(--orange); color: #fff; }
+.chip.used { opacity: .3; cursor: default; border-style: dashed; }
+.sents { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px 40px; grid-template-columns: 1fr 1fr; }
+.sents li { display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+.sents .no { flex: none; width: 30px; color: var(--orange); font-weight: 800; }
+.sents .line { min-width: 0; line-height: 2.1; }
+.gap {
+  display: inline-block; min-width: 118px; height: 38px; vertical-align: middle; margin: 0 8px;
+  border: 2px dashed #b9b2c2; border-radius: 10px; background: #f6f4f9; padding: 0 12px; font-weight: 700;
+}
+.gap.sel { border: 2px solid var(--orange); background: var(--cream); }
+.gap.done { border: 2px solid var(--ok); background: var(--ok-bg); color: var(--ok); cursor: default; }
+.ex { color: var(--purple); font-weight: 700; text-decoration: underline; text-decoration-color: var(--yellow); text-decoration-thickness: 4px; text-underline-offset: 3px; margin: 0 4px; }
+
+/* Task 3 */
+.pills { display: flex; gap: 10px; margin-bottom: 18px; }
+.pill { border: 2px solid var(--purple); background: #fff; color: var(--purple); border-radius: 999px; padding: 4px 22px; font-weight: 800; }
+.pill[aria-selected="true"] { background: var(--purple); color: #fff; }
+.dlg { display: grid; gap: 10px; max-width: 760px; }
+.ln {
+  display: flex; gap: 14px; align-items: center; text-align: left; width: 100%;
+  border: 2px solid var(--lime); background: #fff; border-radius: 12px; padding: 10px 14px; min-height: 56px;
+}
+.ln:hover:not(.done) { border-color: var(--orange); }
+.ln .num {
+  flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+  border: 2px dashed #b9b2c2; font-weight: 800; color: #fff;
+}
+.ln.done { background: var(--ok-bg); border-color: var(--ok); cursor: default; }
+.ln.done .num { background: var(--ok); border: 2px solid var(--ok); }
+.ln.ex-line .num { background: var(--purple); border-color: var(--purple); }
+.ln.ex-line { background: var(--cream); border-color: var(--orange); cursor: default; }
+
+/* Task 4 */
+.game { display: grid; grid-template-columns: 5fr 7fr; gap: 24px; align-items: start; }
+.memo { background: var(--cream); border: 2px solid var(--orange); border-radius: 16px; padding: 16px 18px; display: grid; gap: 12px; font-size: 18px; }
+.memo h3 { margin: 0; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--orange); }
+.memo p { margin: 0; }
+.memo .sample { color: var(--purple); font-weight: 700; }
+.pairs { display: grid; gap: 6px; }
+.pr { display: flex; gap: 10px; align-items: baseline; }
+.pr .x, .pr .v { flex: none; width: 22px; font-weight: 800; }
+.pr .x { color: var(--bad); }
+.pr .v { color: var(--ok); }
+.pr.same { font-size: 17px; }
+.meter { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-weight: 700; }
+.bar { flex: 1; height: 14px; border-radius: 999px; background: var(--lime-soft); overflow: hidden; border: 2px solid var(--lime); }
+.bar i { display: block; height: 100%; width: 0; background: var(--orange); transition: width .25s; }
+.rows { display: grid; gap: 8px; }
+.rw { display: flex; gap: 12px; align-items: center; }
+.rw .k { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--cream); color: var(--orange); font-weight: 800; }
+.rw.filled .k { background: var(--orange); color: #fff; }
+.rw input { flex: 1; min-width: 0; height: 42px; border: 2px solid #d4cfdc; background: #f6f4f9; border-radius: 10px; padding: 0 12px; }
+.rw input:focus { border-color: var(--orange); background: #fff; outline: none; }
+.rw.cur .k { box-shadow: 0 0 0 3px rgba(95,47,147,.35); }
+.cards { margin-top: 22px; border: 2px dashed var(--purple); border-radius: 16px; padding: 14px 18px; background: #f7f1fc; }
+.cards h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--purple); }
+.cards ol { margin: 0; padding: 0; list-style: none; columns: 2 280px; column-gap: 28px; font-size: 18px; }
+.cards li { padding: 3px 8px; border-radius: 8px; break-inside: avoid; display: flex; gap: 10px; }
+.cards li b { flex: none; width: 24px; color: var(--purple); }
+.cards li.cur { background: var(--yellow); }
+
+.foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+.nav, .reset {
+  border: 2px solid var(--purple); background: #fff; color: var(--purple); border-radius: 12px; padding: 8px 22px; font-weight: 700; font-size: 18px;
+}
+.nav.next { background: var(--purple); color: #fff; }
+.nav[disabled] { opacity: .3; cursor: default; }
+.reset { border-color: #cfc8d8; color: var(--ink-soft); padding: 6px 16px; font-size: 16px; }
+.done-msg { color: var(--ok); font-weight: 800; margin-left: 14px; }
+.tools { display: flex; align-items: center; margin-top: 18px; min-height: 40px; }
+
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.bad { animation: shake .3s; border-color: var(--bad) !important; background: var(--bad-bg) !important; }
+@media (prefers-reduced-motion: reduce) { .bad { animation: none; } .bar i { transition: none; } }
+
+@media (max-width: 760px) {
+  body { font-size: 18px; }
+  .cols, .sents, .game { grid-template-columns: 1fr; }
+  .tab { width: 46px; height: 46px; font-size: 24px; }
+  .gap { min-width: 96px; }
+}
+</style>
+</head>
+<body>
+
+<div class="band"><div class="band-in" role="tablist" id="tabs">
+  <button class="tab" role="tab" data-i="0">1</button>
+  <button class="tab" role="tab" data-i="1">2</button>
+  <button class="tab" role="tab" data-i="2">3</button>
+  <button class="tab" role="tab" data-i="3">4</button>
+</div></div>
+
+<main>
+  <section class="card" id="s0" hidden>
+    <div class="head"><span class="n">1</span><h2>Match the chunk with the meaning.</h2></div>
+    <div class="cols"><div class="col" id="c1L"></div><div class="col" id="c1R"></div></div>
+    <div class="tools"><button class="reset" data-reset="1">Reset</button><span class="done-msg" id="m1"></span></div>
+  </section>
+
+  <section class="card" id="s1" hidden>
+    <div class="head"><span class="n">2</span><h2>Complete the chunks.</h2></div>
+    <div class="bank" id="bank"></div>
+    <ol class="sents" id="sents"></ol>
+    <div class="tools"><button class="reset" data-reset="2">Reset</button><span class="done-msg" id="m2"></span></div>
+  </section>
+
+  <section class="card" id="s2" hidden>
+    <div class="head"><span class="n">3</span><h2>Put the dialogue in order.</h2></div>
+    <div class="pills" role="tablist" id="pills"></div>
+    <div class="dlg" id="dlg"></div>
+    <div class="tools"><button class="reset" data-reset="3">Reset</button><span class="done-msg" id="m3"></span></div>
+  </section>
+
+  <section class="card" id="s3" hidden>
+    <div class="head"><span class="n">4</span><h2>Say no. Give an excuse.</h2></div>
+    <div class="game">
+      <div class="memo">
+        <h3>Rules</h3>
+        <p class="sample">– Do you want to watch a film today?<br>– Sorry, I can't. I'm …</p>
+        <h3>Same excuse?</h3>
+        <div class="pairs">
+          <div class="pr same"><span class="x">✗</span><span>I'm watching TV. / I'm watching films.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="meter"><span id="cnt">0 / 15</span><div class="bar"><i id="barfill"></i></div></div>
+        <div class="rows" id="rows"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <button class="nav" id="prev">← Back</button>
+    <button class="nav next" id="next">Next →</button>
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function shake(nodes) { nodes.forEach(function (n) { n.classList.add('bad'); }); setTimeout(function () { nodes.forEach(function (n) { n.classList.remove('bad'); }); }, 450); }
+
+  /* ---------- navigation ---------- */
+  var cur = 0, tabs = $$('.tab'), secs = [0,1,2,3].map(function (i) { return $('#s' + i); });
+  function show(i) {
+    cur = i;
+    secs.forEach(function (s, k) { s.hidden = k !== i; });
+    tabs.forEach(function (t, k) { t.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
+    $('#prev').disabled = i === 0; $('#next').hidden = i === 3;
+    window.scrollTo(0, 0);
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { show(+t.dataset.i); }); });
+  $('#prev').addEventListener('click', function () { show(cur - 1); });
+  $('#next').addEventListener('click', function () { show(cur + 1); });
+
+  /* ---------- 1. match ---------- */
+  var chunks = ['One minute!', 'Your blog can wait!', "That's a change!", "You've got five minutes.", 'You look different.', 'I have nothing else to wear!', 'Do you want to hang out?', 'On a Monday?', "We're only going to the cinema.", 'Say Happy Birthday from me!'];
+  var means = ["Please wait. I'm busy.", 'Tell him I\'m thinking of him on his birthday.', "I'm surprised. Monday is a strange day for that!", "This is new! It isn't normal for you.", 'Do it later. Something else is more important now.', "It's not a big event.", "I'll give you a little time.", 'Do you want to spend time together?', 'Something is new about how you look.', 'All my other clothes are dirty.'];
+  var key = [0, 4, 3, 6, 8, 9, 7, 2, 5, 1], L = 'abcdefghij';
+  var m1 = { l: null, r: null, done: {} };
+  function build1() {
+    var cl = $('#c1L'), cr = $('#c1R'); cl.innerHTML = ''; cr.innerHTML = '';
+    m1 = { l: null, r: null, done: {} };
+    chunks.forEach(function (c, i) {
+      var b = el('button', 'opt chunk', '<span class="tag">' + (i + 1) + '</span><span class="tx">' + c + '</span>');
+      b.dataset.i = i; b.addEventListener('click', function () { pick1('l', i); }); cl.appendChild(b);
+    });
+    means.forEach(function (m, j) {
+      var b = el('button', 'opt', '<span class="tag">' + L[j] + '</span><span class="tx">' + m + '</span>');
+      b.dataset.j = j; b.addEventListener('click', function () { pick1('r', j); }); cr.appendChild(b);
+    });
+    mark1(0, 0); $('#m1').textContent = '';
+  }
+  function bl(i) { return $('#c1L [data-i="' + i + '"]'); }
+  function br(j) { return $('#c1R [data-j="' + j + '"]'); }
+  function mark1(i, j) {
+    m1.done[i] = true; var a = bl(i), b = br(j);
+    a.classList.remove('sel'); b.classList.remove('sel'); a.classList.add('done'); b.classList.add('done');
+    a.insertAdjacentHTML('beforeend', '<span class="badge">' + L[j] + '</span>');
+    b.insertAdjacentHTML('beforeend', '<span class="badge">' + (i + 1) + '</span>');
+    a.disabled = b.disabled = true;
+  }
+  function pick1(side, v) {
+    if (side === 'l') { if (m1.l !== null) bl(m1.l).classList.remove('sel'); m1.l = v; bl(v).classList.add('sel'); }
+    else { if (m1.r !== null) br(m1.r).classList.remove('sel'); m1.r = v; br(v).classList.add('sel'); }
+    if (m1.l !== null && m1.r !== null) {
+      var i = m1.l, j = m1.r;
+      if (key[i] === j) { mark1(i, j); }
+      else { var a = bl(i), b = br(j); shake([a, b]); setTimeout(function () { a.classList.remove('sel'); b.classList.remove('sel'); }, 450); }
+      m1.l = m1.r = null;
+      if (Object.keys(m1.done).length === 10) $('#m1').textContent = 'Well done!';
+    }
+  }
+
+  /* ---------- 2. complete ---------- */
+  var words = ['wait', 'change', 'got', 'look', 'nothing', 'hang', 'never', 'usually', 'from', 'having'];
+  var sents = ['Your blog can __ !', "That's a __ ! You write it every day.", "OK, you've __ five minutes.", 'You __ different, Lucy.', 'I have __ else to wear!', 'Do you want to __ out?', 'You __ go out on a Monday.', 'You __ just wear jeans and a T-shirt.', 'Say Happy Birthday __ me!', "I'm __ dinner at The Blue Duck."];
+  var s2 = { chip: null, gap: null, n: 0 };
+  function build2() {
+    var bank = $('#bank'), ol = $('#sents'); bank.innerHTML = ''; ol.innerHTML = ''; s2 = { chip: null, gap: null, n: 0 };
+    words.slice().sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); }).forEach(function (w) {
+      var c = el('button', 'chip', w); c.dataset.w = w; c.addEventListener('click', function () { pick2('c', w); }); bank.appendChild(c);
+    });
+    var li0 = el('li', '', '<span class="no">0</span><span class="line">Lucy, lunch is<span class="ex">ready</span>!</span>'); ol.appendChild(li0);
+    sents.forEach(function (s, i) {
+      var parts = s.split('__');
+      var li = el('li', '', '<span class="no">' + (i + 1) + '</span>');
+      var line = el('span', 'line'); line.appendChild(document.createTextNode(parts[0].replace(/\s$/, '')));
+      var g = el('button', 'gap'); g.dataset.i = i; g.setAttribute('aria-label', 'gap ' + (i + 1)); g.addEventListener('click', function () { pick2('g', i); });
+      line.appendChild(g); line.appendChild(document.createTextNode(parts[1].replace(/^\s/, ''))); li.appendChild(line); ol.appendChild(li);
+    });
+    $('#m2').textContent = '';
+  }
+  function gp(i) { return $('#sents [data-i="' + i + '"]'); }
+  function ch(w) { return $('#bank [data-w="' + w + '"]'); }
+  function pick2(side, v) {
+    if (side === 'c') { if (ch(v).classList.contains('used')) return; if (s2.chip) ch(s2.chip).classList.remove('sel'); s2.chip = v; ch(v).classList.add('sel'); }
+    else { if (gp(v).classList.contains('done')) return; if (s2.gap !== null) gp(s2.gap).classList.remove('sel'); s2.gap = v; gp(v).classList.add('sel'); }
+    if (s2.chip && s2.gap !== null) {
+      var w = s2.chip, i = s2.gap, g = gp(i), c = ch(w);
+      if (words[i] === w) { g.textContent = w; g.classList.remove('sel'); g.classList.add('done'); c.classList.remove('sel'); c.classList.add('used'); s2.n++; }
+      else { shake([g, c]); setTimeout(function () { g.classList.remove('sel'); c.classList.remove('sel'); }, 450); }
+      s2.chip = null; s2.gap = null;
+      if (s2.n === 10) $('#m2').textContent = 'Well done!';
+    }
+  }
+
+  /* ---------- 3. dialogues ---------- */
+  var dl = [
+    { lines: ["Lucy, lunch is ready!", "One minute, Dad!", "Your blog can wait!", "No, I'm not writing my blog right now.", "That's a change! You write it every day.", "Yes, I do but I'm chatting to my friend Marisa online.", "OK, you've got five minutes.", "Thanks, Dad!"], order: [6, 3, 0, 7, 2, 5, 1, 4] },
+    { lines: ["You look different, Lucy. Why are you wearing a dress?", "We're only going to the cinema. You usually just wear jeans and a T-shirt.", "Well, all my jeans and T-shirts are dirty.", "I have nothing else to wear!"], order: [2, 0, 3, 1] },
+    { lines: ["Hi, Lucy. Do you want to hang out?", "Sorry, Anne. I'm having dinner at The Blue Duck with Mum and Dad.", "On a Monday?", "You never go out on a Monday.", "It's Dad's birthday today.", "Aw! Say Happy Birthday from me!"], order: [3, 5, 1, 0, 4, 2] }
+  ];
+  var dcur = 0, dstate = [];
+  function resetD(k) { dstate[k] = { next: 1, got: { 0: true } }; }
+  dl.forEach(function (d, k) { resetD(k); });
+  function buildPills() {
+    var p = $('#pills'); p.innerHTML = '';
+    ['A', 'B', 'C'].forEach(function (n, k) {
+      var b = el('button', 'pill', n); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', k === dcur ? 'true' : 'false');
+      b.addEventListener('click', function () { dcur = k; buildPills(); renderD(); }); p.appendChild(b);
+    });
+  }
+  function renderD() {
+    var d = dl[dcur], st = dstate[dcur], box = $('#dlg'); box.innerHTML = '';
+    d.order.forEach(function (idx) {
+      var done = st.got[idx] !== undefined;
+      var b = el('button', 'ln' + (idx === 0 ? ' ex-line' : '') + (done && idx !== 0 ? ' done' : ''),
+        '<span class="num">' + (done ? idx + 1 : '') + '</span><span>' + d.lines[idx] + '</span>');
+      b.addEventListener('click', function () {
+        if (done) return;
+        if (idx === st.next) { st.got[idx] = true; st.next++; renderD(); }
+        else { shake([b]); }
+      });
+      box.appendChild(b);
+    });
+    $('#m3').textContent = st.next === d.lines.length ? 'Well done!' : '';
+  }
+  // the example line is number 1, so "next" starts at index 1 (number 2)
+
+  /* ---------- 4. excuse game ---------- */
+  function build4() {
+    var rows = $('#rows');
+    for (var i = 0; i < 15; i++) {
+      (function (i) {
+        var r = el('div', 'rw', '<span class="k">' + (i + 1) + '</span>');
+        var inp = el('input'); inp.type = 'text'; inp.id = 'ex' + i; inp.setAttribute('aria-label', 'excuse ' + (i + 1)); inp.autocomplete = 'off';
+        inp.addEventListener('input', function () { r.classList.toggle('filled', inp.value.trim() !== ''); count(); });
+        inp.addEventListener('focus', function () { setCur(i); });
+        r.appendChild(inp); rows.appendChild(r);
+      })(i);
+    }
+  }
+  function setCur(i) {
+    $$('.rw').forEach(function (r, k) { r.classList.toggle('cur', k === i); });
+  }
+  function count() {
+    var n = $$('#rows input').filter(function (x) { return x.value.trim() !== ''; }).length;
+    $('#cnt').textContent = n + ' / 15'; $('#barfill').style.width = (n / 15 * 100) + '%';
+  }
+  /* ---------- reset ---------- */
+  $$('[data-reset]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.reset;
+      if (k === '1') build1(); else if (k === '2') build2(); else { resetD(dcur); renderD(); }
+    });
+  });
+
+  build1(); build2(); buildPills(); renderD(); build4(); count(); show(0);
+})();
+</script>
+
+</body>
+</html>
