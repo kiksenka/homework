@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F1EA;--card:#fff;--ink:#2F3E46;--acc:#5F8A86;--accl:#DDE9E6;--sand:#ECE5D6;--line:#CFD8D6;--ok:#B5D6BC;--okb:#7FB08B;--bad:#EBC3B9;--badb:#D49A8A}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+header{padding:12px 14px 4px}
+.dots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--line);border:0;padding:0;cursor:pointer}
+.dot.on{background:var(--acc);transform:scale(1.3)}
+.dot.done{background:var(--okb)}
+main{flex:1;overflow-y:auto;padding:10px 14px 18px}
+.screen{display:none;max-width:720px;margin:0 auto}
+.screen.on{display:block}
+h1{margin:6px 0 12px;font-size:24px;font-weight:600}
+.teacher{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.ava{width:76px;height:76px;border-radius:50%;object-fit:cover;object-position:center 20%;flex:none;background:var(--accl);display:flex;align-items:center;justify-content:center;font-size:32px}
+.bubble{background:var(--accl);border-radius:16px;padding:10px 14px;font-size:18px;line-height:1.35;position:relative}
+.bubble:before{content:"";position:absolute;left:-8px;top:50%;margin-top:-8px;border:8px solid transparent;border-left:0;border-right-color:var(--accl)}
+.tr{border-bottom:1.5px dotted var(--acc);cursor:pointer}
+#tip{position:fixed;background:var(--ink);color:#fff;padding:6px 10px;border-radius:8px;font-size:15px;z-index:20;display:none;pointer-events:none}
+.item{background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.item.ex{background:var(--sand)}
+.num{min-width:28px;height:28px;border-radius:14px;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;padding:0 8px;flex:none}
+.item.ex .num{background:var(--acc);color:#fff}
+.prompt{flex:1 1 180px;min-width:160px;text-align:center}
+.pic{font-size:40px;line-height:1.2}
+.sm{font-size:17px;font-weight:600}
+.sent{font-size:20px;font-weight:500}
+.blank{display:inline-block;width:76px;height:32px;border-radius:8px;background:var(--accl);border:2px dashed var(--acc);vertical-align:-8px;margin:0 6px}
+.say{font-size:20px;background:var(--accl);border-radius:14px;padding:8px 14px;display:inline-block}
+.opts{display:flex;gap:8px;flex-wrap:wrap;flex:1 1 220px;justify-content:center}
+.opt{font:inherit;font-size:17px;font-weight:500;border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:8px 14px;cursor:pointer;min-height:44px}
+.opt:hover{border-color:var(--acc)}
+.opt.ok{background:var(--ok);border-color:var(--okb)}
+.opt.bad{background:var(--bad);border-color:var(--badb);animation:sh .3s}
+.opt:disabled{cursor:default}
+.item.ex .opt{pointer-events:none}
+.item.ex .opt.ok{background:var(--accl);border-color:var(--acc)}
+.play{font-size:26px;background:var(--acc);color:#fff;border:0;border-radius:50%;width:56px;height:56px;cursor:pointer;flex:none}
+.score{text-align:center;color:var(--acc);font-weight:500;margin:6px 0;min-height:22px}
+.story{background:var(--card);border-radius:14px;padding:18px;font-size:22px;line-height:2.3}
+select.gap{font:inherit;font-size:20px;font-weight:500;color:var(--ink);border:2px solid var(--line);border-radius:10px;background:#fff;padding:3px 6px;margin:0 3px}
+select.gap.ok{background:var(--ok);border-color:var(--okb)}
+select.gap.bad{background:var(--bad);border-color:var(--badb);animation:sh .3s}
+select.gap.ex{background:var(--accl);border-color:var(--acc)}
+.line{min-height:48px;flex:1;border-bottom:2px dashed var(--line);display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 2px}
+.bank{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;min-height:44px}
+.chip{font:inherit;font-size:18px;font-weight:500;border:2px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;cursor:pointer}
+.chip:hover{border-color:var(--acc)}
+.line.ok{border-bottom:2px solid var(--okb)}
+.line.ok .chip{background:var(--ok);border-color:var(--okb);pointer-events:none}
+.line.bad{animation:sh .3s}
+.bwrap{flex:1 1 280px;min-width:240px}
+.punct{font-size:22px;font-weight:600;color:var(--acc);padding:0 2px}
+.clues{background:var(--card);border-radius:14px;padding:12px 16px 12px 32px;margin:0 0 10px;font-size:19px;line-height:1.7}
+.who{font-size:20px;font-weight:500}
+.lbl{font-weight:600;color:var(--acc);margin:14px 0 6px}
+.rbox{background:var(--card);border-radius:14px;padding:18px;text-align:center;margin-bottom:12px}
+.rtot{font-size:56px;font-weight:600;color:var(--acc);line-height:1.1}
+.rsub{font-size:18px;margin-top:4px}
+.rdate{color:var(--acc);margin-top:6px;font-size:15px}
+.rlist{background:var(--card);border-radius:14px;padding:6px 16px}
+.rrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:17px}
+.rrow:last-child{border-bottom:0}
+.rrow.part{opacity:.45}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+footer{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:var(--bg)}
+.nav{font:inherit;font-size:18px;font-weight:500;background:var(--acc);color:#fff;border:0;border-radius:12px;padding:10px 24px;cursor:pointer}
+.nav:disabled{opacity:.3;cursor:default}
+#count{color:var(--acc);font-weight:500}
+@media(max-width:520px){h1{font-size:21px}.ava{width:60px;height:60px}.bubble{font-size:16px}.story{font-size:20px}}
+</style>
+</head>
+<body>
+<header><div class="dots" id="dots"></div></header>
+<main id="main"></main>
+<footer><button class="nav" id="back">←</button><div id="count"></div><button class="nav" id="next">→</button></footer>
+<div id="tip"></div>
+
+<script>
+const AVATAR='teacher.jpg'; // положи своё фото рядом с файлом под этим именем
+const rep=(e,n)=>Array(n).fill(e).join('');
+const md=s=>s.replace(/\[([^\]|]+)\|([^\]]+)\]/g,'<span class="tr" data-ru="$2">$1</span>');
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const speakOK='speechSynthesis' in window;
+let voice=null;
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}
+if(speakOK){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(t){if(!speakOK)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';if(voice)u.voice=voice;u.rate=.85;speechSynthesis.speak(u)}
+
+const S=[];
+
+/* 1. Words and pictures */
+(function(){
+ const W=[
+  ["a big city","🏙️"],
+  ["some meat","🥩"],
+  ["near","🏠 → ☕<br><span class='sm'>50 m</span>"],
+  ["far","🏠 → ☕<br><span class='sm'>40 km</span>"],
+  ["it's expensive","💎<br><span class='sm'>£5000</span>"],
+  ["it's cheap","🍬<br><span class='sm'>20p</span>"],
+  ["work in an office","👩‍💻🏢"],
+  ["some nurses","👩‍⚕️👩‍⚕️👩‍⚕️"],
+  ["a taxi driver","🚕🧑"],
+  ["a lot of children","🧒🧒🧒🧒🧒🧒🧒🧒🧒🧒"],
+  ["fresh fruit","🍎🍓🍌"],
+  ["walk in the park","🚶🌳"],
+  ["I don't like it","🤢👎"]
+ ];
+ const names=W.map(w=>w[0]);
+ S.push({type:'quiz',title:"What is it?",instr:"Look at the picture. [Choose|выбери].",
+  items:W.map(w=>{
+   const d=shuffle(names.filter(n=>n!==w[0])).slice(0,3);
+   return {p:`<div class="pic">${w[1]}</div>`,o:[w[0],...d],a:w[0]};
+  })});
+})();
+
+/* 2. Listening */
+(function(){
+ const L=[
+  ["a big city","a big park","a big office"],
+  ["some meat","some fruit","some nurses"],
+  ["It's near.","It's far.","It's cheap."],
+  ["It's expensive.","It's cheap.","It's far."],
+  ["work in an office","work in the park","walk in the park"],
+  ["some nurses","a nurse","some children"],
+  ["a taxi driver","a taxi","a nurse"],
+  ["a lot of children","some children","a lot of nurses"],
+  ["fresh fruit","fresh meat","some fruit"],
+  ["walk in the park","work in the park","walk in the city"],
+  ["I don't like it.","I don't know it.","I like it."]
+ ];
+ S.push({type:'quiz',listen:true,title:"Listen",instr:"Press 🔊. [Choose|выбери] what you hear.",
+  items:L.map(x=>({say:x[0],o:[x[0],x[1],x[2]],a:x[0]}))});
+})();
+
+/* 3. It's cheap / expensive / near / far */
+(function(){
+ const O=["It's cheap.","It's expensive.","It's near.","It's far."];
+ const P=(e,t)=>`<div class="pic">${e}</div><div class="sm">${t}</div>`;
+ S.push({type:'quiz',fixed:true,title:"It's…",instr:"Look at the [price|цена] or the [distance|расстояние].",opts:O,
+  items:[
+   [P("💎","£5000"),O[1]],[P("🥪","£3"),O[0]],[P("🏠 → 🏫","50 m"),O[2]],[P("🏠 → 🏙️","300 km"),O[3]],
+   [P("🚗","£30,000"),O[1]],[P("☕","£1.50"),O[0]],[P("🏠 → 🌳","100 m"),O[2]],[P("✈️","£800"),O[1]],
+   [P("🏠 → 🏢","20 km"),O[3]],[P("🍎","20p"),O[0]],[P("🏠 → 🏥","40 km"),O[3]]
+  ].map(x=>({p:x[0],a:x[1]}))});
+})();
+
+/* 4. a / some / a lot of */
+(function(){
+ const I=(e,n,noun,a,pic)=>({p:`<div class="pic" style="font-size:${n>8?26:38}px">${pic||rep(e,n)}</div><div class="sent">I <span class="tr" data-ru="вижу">see</span> <span class="blank"></span> ${noun}.</div>`,a});
+ S.push({type:'quiz',fixed:true,title:"One, [some|немного], a lot of",instr:"Look at the picture. [Choose|выбери].",opts:["a","some","a lot of"],
+  items:[
+   I('',1,"taxi driver","a","🚕🧑"),I("🧒",14,"children","a lot of"),I("👩‍⚕️",3,"nurses","some"),I("🏢",1,"office","a"),
+   I("🥩",2,"meat","some"),I("🏙️",12,"big cities","a lot of"),I("🧒",1,"child","a"),I("🍓",14,"fresh fruit","a lot of"),
+   I("🍎",3,"fresh fruit","some"),I("👩‍⚕️",12,"nurses","a lot of"),I("🏙️",1,"big city","a")
+  ]});
+})();
+
+/* 5. Story with gaps */
+S.push({type:'story',title:"Tom",instr:"Read. [Choose|выбери] the word.",
+ text:"Hi! I {0} Tom and I {1} a taxi driver in London. I {2} a nurse – I'm a taxi driver! London {3} a small city – it's a very big city! It {4} very expensive. A coffee {5} £10! But my café {6} expensive. It's only £1. My mum {7} a nurse, and her hospital {8} near – it's 100 m from our house. My sister and I {9} at school now. We're in the park! The children {10} in the park too. They {11} near the café. {12} your city big? {13} you near the park?",
+ gaps:[
+  ["am",["am","is","are"]],
+  ["am",["am","is","are"]],
+  ["am not",["am","am not","isn't"]],
+  ["isn't",["is","isn't","aren't"]],
+  ["is",["is","isn't","are"]],
+  ["is",["is","isn't","are"]],
+  ["isn't",["is","isn't","aren't"]],
+  ["is",["is","are","am"]],
+  ["is",["is","isn't","are"]],
+  ["aren't",["are","aren't","isn't"]],
+  ["are",["are","aren't","is"]],
+  ["are",["are","aren't","is"]],
+  ["Is",["Is","Are","Am"]],
+  ["Are",["Are","Is","Am"]]
+ ]});
+
+/* 6. Build the question */
+S.push({type:'build',title:"Make a question",instr:"[Tap|нажми] the words in order.",
+ items:[
+  ["💎❓","is it expensive","?"],["🌳📍","where is the park","?"],["🏙️❓","is the city big","?"],
+  ["💷❓","how much is it","?"],["👤❓","who is he","?"],["🏠📍","is it near","?"],
+  ["👩‍⚕️❓","are you a nurse","?"],["🧒🧒📍","where are the children","?"],["👆❓","what is this","?"],
+  ["🚕👩❓","is she a taxi driver","?"],["🌳↔️","is the park far","?"]
+ ]});
+
+/* 7. Which question? */
+(function(){
+ const Q=(a,o)=>({p:`<div class="say">“${a}”</div>`,o,a:o[0]});
+ S.push({type:'quiz',title:"What is the question?",instr:"Read the answer. [Choose|выбери] the question.",
+  items:[
+   Q("It's £3.",["How much is it?","Where is it?","Who is it?"]),
+   Q("She's my sister.",["Who is she?","Where is she?","Is she a nurse?"]),
+   Q("No, it's far.",["Is the park near?","Where is the park?","How much is the park?"]),
+   Q("They're in the park.",["Where are the children?","Are the children big?","Who are you?"]),
+   Q("Yes, I am.",["Are you a nurse?","Is she a nurse?","Are they nurses?"]),
+   Q("£10.",["How much is it?","Where is it?","Is it a big city?"]),
+   Q("No, it's cheap.",["Is it expensive?","Where is it?","How much is it?"]),
+   Q("Yes, they are.",["Are the children in the park?","Is the child in the park?","Are you in the park?"]),
+   Q("No, she isn't.",["Is she a nurse?","Are you a nurse?","Is he a nurse?"]),
+   Q("It's a big city.",["What is it?","Where is it?","How much is it?"]),
+   Q("He's a taxi driver.",["Who is he?","Where is he?","Is he in the park?"])
+  ]});
+})();
+
+/* 8. Detective */
+S.push({type:'puzzle',title:"Who is who?",instr:"Read the [clues|подсказки]. [Choose|выбери].",
+ puzzles:[
+  {clues:["Tom is not a nurse.","Anna is not a taxi driver.","Mia is not a nurse.","Mia is not a teacher."],
+   rows:[["Tom is","a teacher"],["Anna is","a nurse"],["Mia is","a taxi driver"]],
+   opts:["a nurse","a teacher","a taxi driver"]},
+  {clues:["Ben is not in the park.","Eva is not in an office.","Eva is not in a big city.","Sam is not in an office."],
+   rows:[["Ben is","in an office"],["Eva is","in the park"],["Sam is","in a big city"]],
+   opts:["in a big city","in an office","in the park"]}
+ ]});
+
+S.push({type:'result',title:"Result",instr:"Take a [screenshot|скриншот] 📸"});
+
+/* ---------- engine ---------- */
+const main=document.getElementById('main'),dotsEl=document.getElementById('dots');
+const doneFlags=[];
+let cur=0;
+
+const results=[];
+function tracker(sc,ti,total){
+ const score=sc.querySelector('.score'),missed=new Set();
+ const T={n:0,right:0,total,
+  miss(k){missed.add(k)},
+  step(k){this.n++;if(!missed.has(k))this.right++;
+   score.textContent=this.n<total?`${this.n} / ${total}`:`✓ ${total} / ${total}`;
+   if(this.n>=total){doneFlags[ti]=true;paintDots()}}};
+ results[ti]=T;return T;
+}
+
+function quiz(sc,t,tr){
+ const box=sc.querySelector('.items');
+ t.items.forEach((it,ii)=>{
+  const ex=ii===0,opts=it.o||t.opts,list=(t.fixed||it.fixed)?opts:shuffle(opts);
+  const row=el('div','item'+(ex?' ex':''));
+  row.innerHTML=`<div class="num">${ex?'Example':ii}</div>`+
+   (t.listen?`<button class="play" aria-label="Listen">🔊</button>`:`<div class="prompt">${it.p}</div>`)+`<div class="opts"></div>`;
+  const oe=row.querySelector('.opts');
+  if(t.listen)row.querySelector('.play').onclick=()=>speak(it.say);
+  list.forEach(o=>{
+   const b=el('button','opt');b.textContent=o;
+   if(ex){if(o===it.a)b.classList.add('ok')}
+   else b.onclick=()=>{
+    if(o===it.a){b.classList.add('ok');oe.querySelectorAll('.opt').forEach(x=>x.disabled=true);tr.step(row)}
+    else{b.classList.add('bad');b.disabled=true;tr.miss(row)}
+   };
+   oe.appendChild(b);
+  });
+  box.appendChild(row);
+ });
+ return t.items.length-1;
+}
+
+function story(sc,t,tr){
+ const box=sc.querySelector('.items');
+ const wrap=el('div','story');
+ const parts=t.text.split(/\{(\d+)\}/);
+ parts.forEach((p,i)=>{
+  if(i%2===0){wrap.appendChild(document.createTextNode(p));return}
+  const gi=+p,[ans,opts]=t.gaps[gi],ex=gi===0;
+  const s=el('select','gap');
+  s.innerHTML=ex?`<option>${ans}</option>`:`<option value="">…</option>`+opts.map(o=>`<option>${o}</option>`).join('');
+  if(ex){s.classList.add('ex');s.disabled=true}
+  else s.onchange=()=>{
+   if(s.value===ans){s.classList.remove('bad');s.classList.add('ok');s.disabled=true;tr.step(s)}
+   else{tr.miss(s);s.classList.add('bad');setTimeout(()=>{s.value='';s.classList.remove('bad')},600)}
+  };
+  wrap.appendChild(s);
+ });
+ box.appendChild(wrap);
+ return t.gaps.length-1;
+}
+
+function build(sc,t,tr){
+ const box=sc.querySelector('.items');
+ t.items.forEach((it,ii)=>{
+  const ex=ii===0,words=it[1].split(' ');
+  const row=el('div','item'+(ex?' ex':''));
+  row.innerHTML=`<div class="num">${ex?'Example':ii}</div><div class="prompt" style="flex:0 0 90px;min-width:80px"><div class="pic">${it[0]}</div></div><div class="bwrap"><div class="line"></div><div class="bank"></div></div><div class="punct">${it[2]}</div>`;
+  const line=row.querySelector('.line'),bank=row.querySelector('.bank');
+  const chip=w=>{const c=el('button','chip');c.textContent=w;return c};
+  if(ex){words.forEach(w=>line.appendChild(chip(w)));line.classList.add('ok');box.appendChild(row);return}
+  let order=shuffle(words);if(order.join(' ')===words.join(' '))order=order.reverse();
+  const check=()=>{
+   if(bank.children.length)return;
+   const got=[...line.children].map(c=>c.textContent).join(' ');
+   if(got===it[1]){line.classList.add('ok');tr.step(row)}
+   else{tr.miss(row);line.classList.add('bad');setTimeout(()=>{line.classList.remove('bad');[...line.children].forEach(c=>bank.appendChild(c))},600)}
+  };
+  order.forEach(w=>{
+   const c=chip(w);
+   c.onclick=()=>{
+    if(line.classList.contains('ok'))return;
+    if(c.parentNode===bank){line.appendChild(c);check()}else bank.appendChild(c);
+   };
+   bank.appendChild(c);
+  });
+  box.appendChild(row);
+ });
+ return t.items.length-1;
+}
+
+function puzzle(sc,t,tr){
+ const box=sc.querySelector('.items');let total=0;
+ t.puzzles.forEach((pz,pi)=>{
+  box.appendChild(el('div','lbl',`Puzzle ${pi+1}`));
+  const ul=el('ul','clues');pz.clues.forEach(c=>ul.appendChild(el('li',null,c)));box.appendChild(ul);
+  pz.rows.forEach(([who,ans])=>{
+   total++;
+   const row=el('div','item');
+   row.appendChild(el('div','who',who));
+   const oe=el('div','opts');oe.style.justifyContent='flex-start';
+   shuffle(pz.opts).forEach(o=>{
+    const b=el('button','opt');b.textContent=o;
+    b.onclick=()=>{
+     if(o===ans){b.classList.add('ok');oe.querySelectorAll('.opt').forEach(x=>x.disabled=true);tr.step(row)}
+     else{b.classList.add('bad');b.disabled=true;tr.miss(row)}
+    };
+    oe.appendChild(b);
+   });
+   row.appendChild(oe);box.appendChild(row);
+  });
+ });
+ return total;
+}
+
+function result(sc){sc._res=sc.querySelector('.items');sc.querySelector('.score').remove()}
+function fillResult(sc){
+ let r=0,tot=0;const rows=[];
+ S.forEach((t,i)=>{
+  if(t.type==='result')return;
+  const x=results[i];r+=x.right;tot+=x.total;
+  rows.push(`<div class="rrow${x.n<x.total?' part':''}"><span>${i+1}. ${t.title.replace(/\[([^\]|]+)\|[^\]]+\]/g,'$1')}</span><b>${x.right} / ${x.total}</b></div>`);
+ });
+ sc._res.innerHTML=`<div class="rbox"><div class="rtot">${r} / ${tot}</div></div><div class="rlist">${rows.join('')}</div>`;
+}
+const KIND={quiz,story,build,puzzle,result};
+S.forEach((t,ti)=>{
+ const sc=el('section','screen');
+ sc.innerHTML=`<h1>${md(t.title)}</h1><div class="teacher"><div class="ava">🙂</div><div class="bubble">${md(t.instr)}</div></div><div class="items"></div><div class="score"></div>`;
+ const img=new Image();img.className='ava';img.alt='';img.onload=()=>{sc.querySelector('.ava').replaceWith(img)};img.src=AVATAR;
+ // count first, then build with tracker
+ const counts={quiz:()=>t.items.length-1,story:()=>t.gaps.length-1,build:()=>t.items.length-1,
+  puzzle:()=>t.puzzles.reduce((a,p)=>a+p.rows.length,0),result:()=>0};
+ const tr=tracker(sc,ti,counts[t.type]());
+ KIND[t.type](sc,t,tr);
+ main.appendChild(sc);
+ const d=el('button','dot');d.title=String(ti+1);d.onclick=()=>go(ti);dotsEl.appendChild(d);
+});
+
+const screens=[...document.querySelectorAll('.screen')],dots=[...document.querySelectorAll('.dot')];
+function paintDots(){dots.forEach((d,i)=>{d.className='dot'+(i===cur?' on':'')+(doneFlags[i]&&i!==cur?' done':'')})}
+function go(i){
+ cur=Math.max(0,Math.min(S.length-1,i));
+ screens.forEach((s,k)=>s.classList.toggle('on',k===cur));
+ if(screens[cur]._res)fillResult(screens[cur]);
+ document.getElementById('back').disabled=cur===0;
+ document.getElementById('next').disabled=cur===S.length-1;
+ document.getElementById('count').textContent=`${cur+1} / ${S.length}`;
+ paintDots();main.scrollTop=0;
+ if(speakOK)speechSynthesis.cancel();
+ try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+document.getElementById('back').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+
+const tip=document.getElementById('tip');
+document.addEventListener('click',e=>{
+ const s=e.target.closest('.tr');
+ if(!s){tip.style.display='none';return}
+ tip.textContent=s.dataset.ru;tip.style.display='block';
+ const r=s.getBoundingClientRect();
+ tip.style.left=Math.max(6,Math.min(innerWidth-tip.offsetWidth-6,r.left))+'px';
+ tip.style.top=(r.bottom+6)+'px';
+ clearTimeout(tip._t);tip._t=setTimeout(()=>tip.style.display='none',2500);
+});
+
+go(Math.max(0,(parseInt(location.hash.slice(1))||1)-1));
+</script>
+</body>
+</html>
