@@ -62,6 +62,27 @@ main{max-width:860px;margin:0 auto;padding:20px 16px}
 .opt:hover{border-color:var(--acc)}
 .opt.ok{background:#e6f6ec;border-color:var(--ok)}.opt.bad{background:#fbeaea;border-color:var(--bad)}
 .ex{color:var(--mute);font-weight:600}
+
+.bar{position:sticky;bottom:0;z-index:5;margin:14px -20px -20px;padding:10px 20px 14px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 12px -8px #0003;border-radius:0 0 16px 16px}
+.bar .tray{margin:0 0 8px;min-height:50px;padding:6px;flex-wrap:nowrap;overflow-x:auto;gap:6px}
+.bar .tray .bill{width:78px;flex:none}
+.bar .tray .coin{zoom:.62;flex:none}
+.bar .tray .chip{flex:none;white-space:nowrap}
+.bar .sum{font-size:22px}
+.money{padding-bottom:4px}
+@media(max-width:600px){
+ body{font-size:17px}
+ main{padding:12px 10px}
+ .card{padding:14px}
+ .bar{margin:12px -14px -14px;padding:8px 14px 12px}
+ .money .bill{width:calc(50% - 5px)}
+ .money{gap:10px}
+ .money .coin{zoom:1}
+ .b{font-size:20px;max-width:92%}
+ .menu{grid-template-columns:repeat(3,1fr);gap:8px}
+ .item i{font-size:30px}
+ .scene{gap:8px}
+}
 </style></head><body><main>
 <h1 class="logo"><span>Time for Coffee</span></h1>
 <div class="tabs"><button class="tab on"></button><button class="tab"></button></div>
@@ -70,19 +91,19 @@ main{max-width:860px;margin:0 auto;padding:20px 16px}
  <div class="chat" id="chat"></div>
  <div id="st1" hidden>
   <div class="menu" id="menu2"></div>
-  <div class="tray" id="otray"></div>
-  <div class="row"><button class="btn" id="obtn">✓</button><span class="msg" id="omsg"></span></div>
+  <div class="bar"><div class="tray" id="otray"></div>
+  <div class="row"><button class="btn" id="obtn">✓</button><span class="msg" id="omsg"></span></div></div>
  </div>
  <div id="st2" hidden><button class="say" id="nobtn">No, thanks.</button></div>
  <div id="st3" hidden>
-  <div class="tray" id="ptray"></div>
   <div class="money" id="wallet"></div>
-  <div class="row" style="margin-top:14px"><button class="btn" id="pbtn">✓</button><span class="msg" id="pmsg"></span><span class="sum" id="ptotal"></span></div>
+  <div class="bar"><div class="tray" id="ptray"></div>
+  <div class="row"><button class="btn" id="pbtn">✓</button><span class="msg" id="pmsg"></span><span class="sum" id="ptotal"></span></div></div>
  </div>
  <div id="st4" hidden>
-  <div class="tray" id="ctray"></div>
   <div class="money" id="drawer"></div>
-  <div class="row" style="margin-top:14px"><button class="btn" id="cbtn">✓</button><span class="msg" id="cmsg"></span><span class="sum" id="ctotal"></span></div>
+  <div class="bar"><div class="tray" id="ctray"></div>
+  <div class="row"><button class="btn" id="cbtn">✓</button><span class="msg" id="cmsg"></span><span class="sum" id="ctotal"></span></div></div>
  </div>
  <div id="st5" hidden></div>
  <div id="st6" hidden><button class="say" id="hibtn">Fine, thanks. And you?</button></div>
@@ -151,13 +172,13 @@ const NUM=['','','two','three','four','five','six','seven','eight','nine','ten']
 function orderText(){const c={};sel.forEach(id=>c[id]=(c[id]||0)+1);
  return Object.keys(c).map(id=>c[id]==1?byId[id].n:(NUM[c[id]]||c[id])+' '+PL[id]).join(' and ')+', please.'}
 M.forEach(m=>$('menu2').append(mcard(m,x=>{if(sel.length<10){sel.push(x.id);drawO();speak(x.n)}})));
-function show(n){[1,2,3,4,5,6,7,8].forEach(i=>$('st'+i).hidden=i!==n)}
+function show(n){[1,2,3,4,5,6,7,8].forEach(i=>$('st'+i).hidden=i!==n);if(n>=1&&n<=4)setTimeout(()=>{const e=$('st'+n);if(e)e.scrollIntoView({block:'nearest',behavior:'smooth'})},50)}
 function say(who,t){const d=document.createElement('div');d.className='b '+who;d.textContent=t;$('chat').append(d);speak(t,true);d.style.cursor='pointer';d.onclick=()=>speak(t);d.scrollIntoView({block:'nearest',behavior:'smooth'})}
 function drawO(){const t=$('otray');t.innerHTML='';sel.forEach((id,i)=>{const b=document.createElement('button');b.className='chip';b.textContent=byId[id].n+' ✕';b.onclick=()=>{sel.splice(i,1);drawO()};t.append(b)});$('omsg').textContent=''}
 const ONES='zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' '),TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
 function nw(n){if(n<20)return ONES[n];if(n<100)return TENS[Math.floor(n/10)]+(n%10?' '+ONES[n%10]:'');const h=Math.floor(n/100),r=n%100;return ONES[h]+' hundred'+(r?' '+nw(r):'')}
 function moneyWords(c){if(c==0)return 'zero dollars';const d=Math.floor(c/100),k=c%100;const ds=d?nw(d)+(d==1?' dollar':' dollars'):'',ks=k?nw(k)+(k==1?' cent':' cents'):'';return ds&&ks?ds+' and '+ks:ds||ks}
-function drawP(){tray($('ptray'),pay,i=>{pay.splice(i,1);drawP();speak(moneyWords(sum(pay)))});$('ptotal').textContent=fmt(sum(pay));$('pmsg').textContent=''}
+function drawP(){tray($('ptray'),pay,i=>{pay.splice(i,1);drawP();speak(moneyWords(sum(pay)))});$('ptotal').textContent=fmt(sum(pay))+' / '+fmt(total);$('pmsg').textContent=''}
 function drawC(){tray($('ctray'),chg,i=>{chg.splice(i,1);drawC();speak(moneyWords(sum(chg)))});$('ctotal').textContent=fmt(sum(chg));$('cmsg').textContent=''}
 function setR(){sel=[];pay=[];chg=[];$('chat').innerHTML='';
  drawO();drawP();drawC();$('rnext').disabled=true;
